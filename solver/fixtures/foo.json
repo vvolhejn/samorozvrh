@@ -1,0 +1,27 @@
+{
+    "name": "foo",
+    "alternatives": [
+        [
+            {
+                "day": 0,
+                "time_from": "12:00",
+                "time_to": "13:30",
+                "name": "foo1a"
+            },
+            {
+                "day": 1,
+                "time_from": "10:00",
+                "time_to": "11:30",
+                "name": "foo1b"
+            }
+        ],
+        [
+            {
+                "day": 2,
+                "time_from": "12:00",
+                "time_to": "13:30",
+                "name": "foo2"
+            }
+        ]
+    ]
+}

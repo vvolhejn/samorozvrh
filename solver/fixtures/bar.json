@@ -1,0 +1,13 @@
+{
+    "name": "bar",
+    "alternatives": [
+        [
+            {
+                "day": 0,
+                "time_from": "12:00",
+                "time_to": "13:30",
+                "name": "bar1"
+            }
+        ]
+    ]
+}
