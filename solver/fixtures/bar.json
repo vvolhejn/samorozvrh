@@ -8,6 +8,20 @@
                 "time_to": "13:30",
                 "name": "bar1"
             }
+        ],
+        [
+            {
+                "day": 1,
+                "time_from": "11:00",
+                "time_to": "12:30",
+                "name": "bar2a"
+            },
+            {
+                "day": 2,
+                "time_from": "11:00",
+                "time_to": "12:30",
+                "name": "bar2b"
+            }
         ]
     ]
 }

@@ -22,6 +22,14 @@
                 "time_to": "13:30",
                 "name": "foo2"
             }
+        ],
+        [
+            {
+                "day": 3,
+                "time_from": "12:00",
+                "time_to": "13:30",
+                "name": "foo3"
+            }
         ]
     ]
 }

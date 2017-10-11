@@ -47,8 +47,8 @@ def load_course(json_obj):
             alternatives.append([load_event(e) for e in alt])
 
         return Course(alternatives, name=name)
-    except:
-        raise
+    except KeyError as e:
+        raise ValueError("Missing field in course JSON object: {}".format(e))
 
 
 def load_event(json_obj):
@@ -60,7 +60,7 @@ def load_event(json_obj):
 
         return Event(day, time_from, time_to, name=name)
     except KeyError as e:
-        raise ValueError("Missing field in JSON object: {}".format(e))
+        raise ValueError("Missing field in event JSON object: {}".format(e))
 
     return None
 
