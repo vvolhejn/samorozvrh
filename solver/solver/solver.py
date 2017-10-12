@@ -58,22 +58,7 @@ def solve(courses):
 
                 selection[course_index] = alt_index
 
-        res = selection
-
-        for j in range(len(flat_vars)):
-            if collector.PerformedValue(i, flat_vars[j]):
-                print("{} {} | ".format(collector.PerformedValue(i, flat_vars[j]),
-                                        collector.StartValue(i, flat_vars[j])),
-                      end="")
-            else:
-                print("{} - | ".format(collector.PerformedValue(i, flat_vars[j])),
-                      end="")
-            print(flat_vars[j].Name() + " ", end="")
-            print()
-
-        print()
-
-    return res
+        yield selection
 
 
 def create_course_variables(solver, course):

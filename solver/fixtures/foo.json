@@ -20,14 +20,14 @@
                 "day": 2,
                 "time_from": "12:00",
                 "time_to": "13:30",
-                "name": "foo2"
+                "name": "foo2aaaaaaaa"
             }
         ],
         [
             {
-                "day": 3,
-                "time_from": "12:00",
-                "time_to": "13:30",
+                "day": 2,
+                "time_from": "15:15",
+                "time_to": "17:45",
                 "name": "foo3"
             }
         ]

@@ -1,6 +1,5 @@
 import calendar
-from datetime import time
-from datetime import datetime
+from datetime import time, date, datetime, timedelta
 
 
 class Course:
@@ -71,13 +70,3 @@ def _parse_time(s):
     datetime.time(21, 30)
     """
     return datetime.strptime(s, "%H:%M").time()
-
-
-def print_schedule(events):
-    events_for_day = [[] for _ in range(5)]
-
-    for event in events:
-        events_for_day[event.day].append(event)
-
-    for day in events_for_day:
-        print(day)
