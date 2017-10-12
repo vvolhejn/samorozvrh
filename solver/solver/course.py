@@ -4,14 +4,14 @@ from datetime import time, date, datetime, timedelta
 
 class Course:
 
-    alternatives = []  # type: List[List[Event]]
+    options = []  # type: List[List[Event]]
 
-    def __init__(self, alternatives=[], name=None):
-        self.alternatives = alternatives
+    def __init__(self, options=[], name=None):
+        self.options = options
         self.name = name
 
     def __repr__(self):
-        return str(self.alternatives)
+        return str(self.options)
 
 
 class Event:
@@ -41,11 +41,11 @@ class Event:
 def load_course(json_obj):
     try:
         name = json_obj["name"]
-        alternatives = []
-        for alt in json_obj["alternatives"]:
-            alternatives.append([load_event(e) for e in alt])
+        options = []
+        for opt in json_obj["options"]:
+            options.append([load_event(e) for e in opt])
 
-        return Course(alternatives, name=name)
+        return Course(options, name=name)
     except KeyError as e:
         raise ValueError("Missing field in course JSON object: {}".format(e))
 

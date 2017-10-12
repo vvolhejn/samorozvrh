@@ -1,6 +1,6 @@
 {
     "name": "bar",
-    "alternatives": [
+    "options": [
         [
             {
                 "day": 0,

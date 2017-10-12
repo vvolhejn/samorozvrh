@@ -17,8 +17,8 @@ def main():
     courses = [foo_course, bar_course]
     for selection in solver.solve(courses):
         events = []
-        for c, alt_index in zip(courses, selection):
-            events.extend(c.alternatives[alt_index])
+        for c, opt_index in zip(courses, selection):
+            events.extend(c.options[opt_index])
 
         print(schedule_to_string(events))
 
