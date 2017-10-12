@@ -1,4 +1,5 @@
 import json
+import logging
 
 import course
 from output import schedule_to_string
@@ -6,6 +7,8 @@ import solver
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
+
     foo = json.load(open("fixtures/foo.json"))
     foo_course = course.load_course(foo)
     bar = json.load(open("fixtures/bar.json"))

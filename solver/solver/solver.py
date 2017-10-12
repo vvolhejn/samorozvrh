@@ -1,7 +1,10 @@
 import calendar
+import logging
 
 from ortools.constraint_solver import pywrapcp
 # Refer to https://github.com/google/or-tools/issues/62
+
+logger = logging.getLogger(__name__)
 
 
 def solve(courses):
@@ -9,10 +12,8 @@ def solve(courses):
     Given a list of courses to enroll in (a course may have multiple alternative times),
     find a valid schedule.
     """
-    # main2()
     solver = pywrapcp.Solver("autorozvrh")
 
-    print("----------")
     flat_vars = []
     flat_vars_inverse = []
 
@@ -21,47 +22,51 @@ def solve(courses):
         flat_vars.extend([v for v, _ in course_vars])
         flat_vars_inverse.extend([(course_index, alt_index) for _, alt_index in course_vars])
 
-    # all_course_vars = [create_course_variables(solver, course) for course in courses]
     sequences_for_day = create_disjunctive_constraints(solver, flat_vars)
 
-    # flat_vars = []
-    # for course_vars in all_course_vars:
-    #     flat_vars.extend([event for alternative in course_vars for event in alternative])
-
     collector = solver.AllSolutionCollector()
-    # collector.Add(sequence)
+    # This makes it so that we can query the collector for the variables' values
     collector.Add(flat_vars)
-    sequencePhase = solver.Phase(sequences_for_day, solver.SEQUENCE_DEFAULT)
-    intervalPhase = solver.Phase(flat_vars, solver.INTERVAL_DEFAULT)
-    mainPhase = solver.Compose([sequencePhase,
-                                intervalPhase])
 
-    ok = solver.Solve(mainPhase, [collector])
+    sequence_phase = solver.Phase(sequences_for_day, solver.SEQUENCE_DEFAULT)
+    interval_phase = solver.Phase(flat_vars, solver.INTERVAL_DEFAULT)
+    main_phase = solver.Compose([sequence_phase,
+                                 interval_phase])
 
+    ok = solver.Solve(main_phase, [collector])
     if not ok:
-        print("No solution found or some other error occurred.")
+        logger.warning("No solution was found or an error occurred.")
         return
 
-    print(collector.SolutionCount())
-    res = None
-    for i in range(collector.SolutionCount()):
-        print("Solution ", i)
-        selection = [None] * len(courses)
+    logger.info("Number of solutions: {}".format(collector.SolutionCount()))
 
-        for j in range(len(flat_vars)):
-            if collector.PerformedValue(i, flat_vars[j]):
-                course_index, alt_index = flat_vars_inverse[j]
+    for solution_index in range(collector.SolutionCount()):
+        logger.info("Solution {}".format(solution_index))
+        yield _solution_to_selection(collector, solution_index,
+                                     flat_vars, flat_vars_inverse, len(courses))
 
-                if selection[course_index] and selection[course_index] != alt_index:
-                    raise RuntimeError("Multiple alternatives were chosen for"
-                                       "course {} ".format(course_index))
 
-                selection[course_index] = alt_index
+def _solution_to_selection(collector, solution_index, flat_vars, flat_vars_inverse, n_courses):
+    selection = [None] * n_courses
 
-        yield selection
+    for j in range(len(flat_vars)):
+        if collector.PerformedValue(solution_index, flat_vars[j]):
+            course_index, alt_index = flat_vars_inverse[j]
+
+            if selection[course_index] and selection[course_index] != alt_index:
+                raise RuntimeError("Multiple alternatives were chosen for"
+                                   "course {} ".format(course_index))
+
+            selection[course_index] = alt_index
+
+    return selection
 
 
 def create_course_variables(solver, course):
+    """
+    Given a course, returns a (flat) list of variables corresponding to the course's events.
+    Appropriate constraints are added to make the solver pick exactly one alternative.
+    """
     variables = []
     representatives = []
 
@@ -72,6 +77,7 @@ def create_course_variables(solver, course):
 
         alt_variables = []
         for event in alt:
+            # We fix the event's time but allow it to be optional
             var = solver.FixedDurationIntervalVar(
                 time_to_int(event.time_from),  # Minimum start time
                 time_to_int(event.time_from),  # Maximum start time
@@ -79,9 +85,7 @@ def create_course_variables(solver, course):
                 True,  # Is the interval optional?
                 "{} - {}".format(course.name, event.name)
             )
-            # Sneak in our properties
-            var.day = event.day
-            var.alternative_index = alt_index
+            var.day = event.day  # This is our custom property
 
             alt_variables.append(var)
 
@@ -101,7 +105,9 @@ def create_course_variables(solver, course):
 
 def create_disjunctive_constraints(solver, flat_vars):
     """
-    Create constrains that forbids multiple events from taking place at the same time
+    Create constrains that forbids multiple events from taking place at the same time.
+    Returns a list of `SequenceVar`s, one for each day. These are then used in the first
+    phase of the solver.
     """
     events_for_day = [[] for _ in range(5)]
 
