@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-
 	"net/http"
 	"net/url"
 	"strconv"
@@ -16,16 +15,6 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-type Event struct {
-	Type       string
-	Name       string
-	Teacher    string
-	Day        int
-	TimeFrom   time.Time
-	TimeTo     time.Time
-	WeekParity int // Every week = 0; Odd weeks = 1; Even weeks = 2
-}
-
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s"
 
 func GetCourseEvents(courseCode string) ([]Event, error) {
@@ -35,7 +24,7 @@ func GetCourseEvents(courseCode string) ([]Event, error) {
 	}
 	relativeScheduleUrl, err := getRelativeScheduleUrl(resp.Body)
 	if err != nil {
-		return []Event{}, nil
+		return []Event{}, err
 	}
 	scheduleUrl := getAbsoluteUrl(sisUrl, relativeScheduleUrl)
 
