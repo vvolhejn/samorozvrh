@@ -31,6 +31,11 @@ func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/sisquery/", sisQueryHandler)
+
+	// Path relative to the directory the binary is ran in
+	fs := http.FileServer(http.Dir("static"))
+	http.Handle("/", fs)
+
 	fmt.Println("Listening on :8080")
 	http.ListenAndServe(":8080", nil)
 }

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Samorozvrh</title>
+    <link rel="stylesheet" href="style.css"></link>
+</head>
+<body>
+
+<form>
+    Kód předmětu:<br>
+    <input type="text" name="course_code" id="course_code" value="NTIN061">
+    <input type="submit" value="Přidat" onclick="return handleForm()">
+</form>
+<div id="status"></div>
+<hr>
+<div id="courses">
+    <table id="course_table">
+        <thead></thead>
+        <tbody id="course_table_body">
+        </tbody>
+    </table>
+</div>
+
+</body>
+<script type="text/javascript" src="app.js"></script>
+</html>
