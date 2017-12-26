@@ -4,10 +4,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/iamwave/samorozvrh/sisparse"
 	"net/http"
-	"strings"
 )
 
 func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,16 +16,8 @@ func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		fmt.Fprintf(w, `{"error":"%s"}`, err)
 	} else {
-		encoded := make([]string, len(events))
-		for i, e := range events {
-			bytes, err := sisparse.JSONEncodeEvent(&e)
-			if err != nil {
-				fmt.Fprintf(w, `{"error":"%s"}`, err)
-				return
-			}
-			encoded[i] = string(bytes)
-		}
-		fmt.Fprintf(w, `{"data":[%s]}`, strings.Join(encoded, ","))
+		s, _ := json.Marshal(events)
+		fmt.Fprintf(w, `{"data":%s}`, string(s))
 	}
 }
 

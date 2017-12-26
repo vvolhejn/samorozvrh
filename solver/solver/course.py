@@ -38,6 +38,10 @@ class Event:
         )
 
 
+def load_course_array(json_obj):
+    return [load_course(course) for course in json_obj]
+
+
 def load_course(json_obj):
     try:
         name = json_obj["name"]

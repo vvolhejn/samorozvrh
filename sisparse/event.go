@@ -15,7 +15,7 @@ type Event struct {
 	WeekParity int // Every week = 0; Odd weeks = 1; Even weeks = 2
 }
 
-func JSONEncodeEvent(e *Event) ([]byte, error) {
+func (e Event) MarshalJSON() ([]byte, error) {
 	return json.Marshal(&struct {
 		Type       string `json:"type"`
 		Name       string `json:"name"`

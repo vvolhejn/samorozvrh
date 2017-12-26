@@ -17,14 +17,18 @@ import (
 
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s"
 
-func GetCourseEvents(courseCode string) ([]Event, error) {
+// Returns a two-dimensional array containing groups of events.
+// Each group is a slice of events which must be enrolled together,
+// the groups represent different times/teachers of the same course.
+// Also, lectures and seminars/practicals are in separate groups.
+func GetCourseEvents(courseCode string) ([][]Event, error) {
 	resp, err := http.Get(fmt.Sprintf(sisUrl, courseCode))
 	if err != nil {
 		return nil, err
 	}
 	relativeScheduleUrl, err := getRelativeScheduleUrl(resp.Body)
 	if err != nil {
-		return []Event{}, err
+		return nil, err
 	}
 	scheduleUrl := getAbsoluteUrl(sisUrl, relativeScheduleUrl)
 
@@ -57,7 +61,7 @@ func getRelativeScheduleUrl(body io.ReadCloser) (string, error) {
 	return scrape.Attr(scheduleLink, "href"), nil
 }
 
-func parseCourseEvents(body io.ReadCloser) []Event {
+func parseCourseEvents(body io.ReadCloser) [][]Event {
 	root, err := html.Parse(body)
 	if err != nil {
 		panic(err)
@@ -73,11 +77,30 @@ func parseCourseEvents(body io.ReadCloser) []Event {
 
 	eventsTable := scrape.FindAll(root, matcher)
 	if len(eventsTable) == 0 {
-		panic("Couldn't find events table")
+		// The event table is not present at all (possibly SIS returned an error message)
+		return [][]Event{}
 	}
-	res := make([]Event, len(eventsTable))
-	for i, e := range eventsTable {
-		res[i] = parseEvent(e)
+
+	res := [][]Event{}
+	group := []Event{}
+	for _, row := range eventsTable {
+		event := parseEvent(row)
+		// A non-empty name means the start of a new group;
+		// names are omitted in all but the first event of a group.
+		if event.Name != "" {
+			if len(group) > 0 {
+				res = append(res, group)
+			}
+			group = []Event{}
+		} else {
+			// Add the missing fields based on the group's first event
+			event.Name = group[0].Name
+			event.Teacher = group[0].Teacher
+		}
+		group = append(group, event)
+	}
+	if len(group) > 0 {
+		res = append(res, group)
 	}
 	return res
 }

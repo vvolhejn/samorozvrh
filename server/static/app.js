@@ -1,13 +1,13 @@
 var courses = {}
 var loadedCourseCodes = {}
 
-function handleForm() {
+function addCourse() {
     var courseCode = document.getElementById("course_code").value
     if (loadedCourseCodes[courseCode]) {
         setStatusMessage("Předmět " + courseCode + " už je přidán")
         return false
     }
-    makeSisRequest(courseCode, function(responseString, error) {
+    var callback = function(responseString, error) {
         if (error) {
             setStatusMessage("Nastala chyba: " + error)
             return
@@ -17,15 +17,18 @@ function handleForm() {
             setStatusMessage("Nepodařilo se najít předmět " + courseCode + "; je kód zadán správně?")
             return
         }
-        addEvents(response['data'])
+        addGroups(response['data'])
         updateCourses()
         loadedCourseCodes[courseCode] = true
         setStatusMessage("Přidán předmět " + courseCode)
-    })
+    }
+    setStatusMessage("Hledám předmět " + courseCode)
+    makeHttpRequest("GET", "sisquery/" + encodeURIComponent(courseCode), null, callback)
     return false // prevents default form submission behavior (refreshing the page)
 }
 
-function makeSisRequest(courseCode, callback) {
+function makeHttpRequest(method, url, body, callback) {
+    // method should be "GET" or "POST"
     var request = new XMLHttpRequest()
     request.onreadystatechange = function() {
         if (this.readyState == 4) {
@@ -35,28 +38,66 @@ function makeSisRequest(courseCode, callback) {
                 callback(null, request.responseText)
             }
         }
-    };
-    setStatusMessage("Hledám předmět " + courseCode)
-
-    request.open("GET", "sisquery/" + encodeURIComponent(courseCode), true)
-    request.send()
+    }
+    request.open(method, url, true)
+    request.send(body)
 }
 
-function addEvents(data) {
+function addGroups(data) {
     for (var i = 0; i < data.length; i++) {
-        addEvent(data[i])
+        addGroup(data[i])
     }
 }
 
-function addEvent(e) {
-    var id = e.type + ";" + e.name
+function addGroup(group) {
+    if (group.length == 0) {
+        return
+    }
+    var type = group[0].type
+    var name = group[0].name
+    var id = type + ";" + name
+
     if (courses[id] === undefined) {
         courses[id] = {
-            name: e.name + " (" + ((e.type==='P') ? "přednáška" : "seminář") + ")",
+            id: id,
+            name: name + " (" + ((type==='P') ? "přednáška" : "seminář") + ")",
             options: []
         }
     }
-    courses[id].options.push(e)
+    courses[id].options.push(group)
+}
+
+function updateCourses() {
+    var names = []
+    for (var courseId in courses) {
+        names.push([courses[courseId].name, courseId])
+    }
+    names.sort()
+
+    var tbody = document.createElement('tbody');
+    tbody.id = 'course_table_body'
+
+    names.forEach(function(name){
+        var row = tbody.insertRow(-1)
+        row.setAttribute("colspan", "2")
+        row.setAttribute("class", "course_header")
+        row.insertCell(-1).innerText = name[0]
+
+        courses[name[1]].options.forEach(function(option) {
+            var row = tbody.insertRow(-1)
+            row.insertCell(-1).innerText = option[0].teacher
+            times = option.map(getTimeString).join("; ")
+            row.insertCell(-1).innerText = times
+
+        })
+    })
+
+    var oldTbody = document.getElementById("course_table_body")
+    oldTbody.parentNode.replaceChild(tbody, oldTbody)
+}
+
+function setStatusMessage(s) {
+    document.getElementById("status").innerHTML = s
 }
 
 function getTimeString(e) {
@@ -70,35 +111,8 @@ function getTimeString(e) {
     return s
 }
 
-function updateCourses() {
-    var names = []
-    for (var courseId in courses) {
-        names.push([courses[courseId].name, courseId])
-    }
-    names.sort()
-
-    var tbody = document.createElement('tbody');
-    tbody.id = 'course_table_body'
-
-    for (var i = 0; i < names.length; i++) {
-        var row = tbody.insertRow(-1)
-        row.setAttribute("colspan", "2")
-        row.setAttribute("class", "course_header")
-        row.insertCell(-1).innerText = names[i][0]
-
-        var options = courses[names[i][1]].options
-        for (var j = 0; j < options.length; j++) {
-            var row = tbody.insertRow(-1)
-            row.insertCell(-1).innerText = options[j].teacher
-            row.insertCell(-1).innerText = getTimeString(options[j])
-        }
-        tbody.appendChild(row)
-    }
-
-    var oldTbody = document.getElementById("course_table_body")
-    oldTbody.parentNode.replaceChild(tbody, oldTbody)
-}
-
-function setStatusMessage(s) {
-    document.getElementById("status").innerHTML = s
+function createSchedule() {
+    console.log(JSON.stringify(Object.values(courses)))
+    //makeHttpRequest("POST", "schedulequery", JSON.stringify(courses), callback)
+    return false
 }

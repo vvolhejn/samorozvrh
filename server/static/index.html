@@ -9,7 +9,10 @@
 <form>
     Kód předmětu:<br>
     <input type="text" name="course_code" id="course_code" value="NTIN061">
-    <input type="submit" value="Přidat" onclick="return handleForm()">
+    <input type="submit" value="Přidat" onclick="return addCourse()">
+</form>
+<form>
+    <input type="submit" value="Sestavit rozvrh" onclick="return createSchedule()">
 </form>
 <div id="status"></div>
 <hr>
@@ -20,7 +23,8 @@
         </tbody>
     </table>
 </div>
-
+<div id="schedule">
+</div>
 </body>
 <script type="text/javascript" src="app.js"></script>
 </html>

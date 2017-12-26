@@ -1,5 +1,6 @@
 import json
 import logging
+import argparse
 
 import course
 from output import schedule_to_string
@@ -8,13 +9,13 @@ import solver
 
 def main():
     logging.basicConfig(level=logging.INFO)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("file")
+    args = parser.parse_args()
 
-    foo = json.load(open("fixtures/foo.json"))
-    foo_course = course.load_course(foo)
-    bar = json.load(open("fixtures/bar.json"))
-    bar_course = course.load_course(bar)
+    courses_json = json.load(open(args.file))
+    courses = course.load_course_array(courses_json)
 
-    courses = [foo_course, bar_course]
     for selection in solver.solve(courses):
         events = []
         for c, opt_index in zip(courses, selection):
