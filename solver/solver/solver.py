@@ -6,6 +6,9 @@ from ortools.constraint_solver import pywrapcp
 
 logger = logging.getLogger(__name__)
 
+TIME_LIMIT_MS = 500
+SOLUTIONS_LIMIT = 5
+
 
 def solve(courses):
     """
@@ -33,7 +36,11 @@ def solve(courses):
     main_phase = solver.Compose([sequence_phase,
                                  interval_phase])
 
-    ok = solver.Solve(main_phase, [collector])
+    time_limit_ms = solver.TimeLimit(TIME_LIMIT_MS)
+    solutions_limit = solver.SolutionsLimit(SOLUTIONS_LIMIT)
+
+    ok = solver.Solve(main_phase, [time_limit_ms, solutions_limit, collector])
+    logger.info("Time: {} ms".format(solver.WallTime()))
     if not ok:
         logger.warning("No solution was found or an error occurred.")
         return
