@@ -39,9 +39,8 @@ func solverQueryHandler(w http.ResponseWriter, r *http.Request) {
 	res, err := Solve(body)
 	if err != nil {
 		fmt.Fprintf(w, `{"error":"%s"}`, err)
-		// http.Error(w, err.Error(), http.StatusInternalServerError)
 	} else {
-		fmt.Fprintf(w, `{"data":%s}`, string(res))
+		fmt.Fprint(w, string(res))
 	}
 }
 
