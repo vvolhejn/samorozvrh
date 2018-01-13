@@ -22,11 +22,8 @@ func Solve(query []byte) ([]byte, error) {
 
 	commandParts := strings.Split(SOLVER_COMMAND+" "+tempfile.Name(), " ")
 	subProcess := exec.Command(commandParts[0], commandParts[1:]...)
-	cwd, err := os.Getwd()
-	if err != nil {
-		return nil, err
-	}
-	subProcess.Dir = path.Join(cwd, "solver")
+
+	subProcess.Dir = path.Join(rootDir, "solver")
 	res, err := subProcess.CombinedOutput()
 	fmt.Println(string(res))
 	if err != nil {

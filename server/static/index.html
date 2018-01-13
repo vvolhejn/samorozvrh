@@ -26,5 +26,43 @@
 <div id="schedule">
 </div>
 </body>
+
+<script id="course_list_template" type="text/x-handlebars-template">
+    {{#each this}}
+    <tr class="course_header">
+        <td colspan="2">{{this.[0]}}</td>
+    </tr>
+    {{#each this.[1].options}}
+    <tr>
+        <td>{{[0].teacher}}</td>
+        <td>{{all_times}}</td>
+    </tr>
+    {{/each}}
+    {{/each}}
+</script>
+
+<script id="schedule_template" type="text/x-handlebars-template">
+    <table id="schedule_table">
+        {{#each this}}
+        <tr>
+            <td>{{day}}</td>
+            <td>
+                {{#each groups}}
+                <span class="group_span">
+                    {{#each this}}
+                        <span class="event_span" style="{{event_style}}">
+                        {{name}}<br>
+                        {{teacher}}
+                        </span>
+                    {{/each}}
+                </span>
+                {{/each}}
+            </td>
+        </tr>
+        {{/each}}
+    </table>
+</script>
+
+<script type="text/javascript" src="lib/handlebars-v4.0.11.js"></script>
 <script type="text/javascript" src="app.js"></script>
 </html>

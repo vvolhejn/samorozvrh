@@ -1,3 +1,21 @@
 .course_header {
     font-weight: bold;
 }
+
+.selected_course {
+    background-color: #DDD;
+}
+
+#schedule_table {
+    width: 100%;
+    background: yellow;
+}
+
+.group_span {
+    width: 100%;
+}
+
+.event_span {
+    float: left;
+    background: #FFDDDD;
+}

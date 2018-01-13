@@ -1,5 +1,9 @@
+"use strict"
+
 var courses = {}
 var loadedCourseCodes = {}
+var selectedOptions = {}
+var courseListTemplate, scheduleTemplate
 
 function addCourse() {
     var courseCode = document.getElementById("course_code").value
@@ -12,7 +16,11 @@ function addCourse() {
             setStatusMessage("Nastala chyba: " + error)
             return
         }
-        response = JSON.parse(responseString)
+        if (!responseString) {
+            setStatusMessage("Nastala chyba: Server neodpovídá.")
+            return
+        }
+        var response = JSON.parse(responseString)
         if (response['error']) {
             setStatusMessage("Nepodařilo se najít předmět " + courseCode + "; je kód zadán správně?")
             return
@@ -70,30 +78,85 @@ function addGroup(group) {
 function updateCourses() {
     var names = []
     for (var courseId in courses) {
-        names.push([courses[courseId].name, courseId])
+        names.push([courses[courseId].name, courses[courseId]])
     }
     names.sort()
 
-    var tbody = document.createElement('tbody');
-    tbody.id = 'course_table_body'
+    var tbody = document.getElementById("course_table_body")
+    tbody.innerHTML = courseListTemplate(names)
+}
 
-    names.forEach(function(name){
-        var row = tbody.insertRow(-1)
-        row.setAttribute("colspan", "2")
-        row.setAttribute("class", "course_header")
-        row.insertCell(-1).innerText = name[0]
+function createSchedule() {
+    var queryArray = Object.values(courses)
+    
+    var callback = function(responseString, error) {
+        if (error) {
+            setStatusMessage("Nastala chyba: " + error)
+            return
+        }
+        if (!responseString) {
+            setStatusMessage("Nastala chyba: Server neodpovídá.")
+            return
+        }
+        var response = JSON.parse(responseString)
+        if (response['error']) {
+            setStatusMessage("Chyba při tvorbě rozvrhu: " + response['error'])
+            return
+        }
+        setStatusMessage("Rozvrh sestaven: " + response["data"])
+        for (var i = 0; i < queryArray.length; i++) {
+            selectedOptions[queryArray[i].id] = response["data"][i]
+        }
+        updateCourses()
+        renderSchedule()
+    }
 
-        courses[name[1]].options.forEach(function(option) {
-            var row = tbody.insertRow(-1)
-            row.insertCell(-1).innerText = option[0].teacher
-            times = option.map(getTimeString).join("; ")
-            row.insertCell(-1).innerText = times
+    makeHttpRequest("POST", "solverquery/", JSON.stringify(queryArray), callback)
+    return false
+}
 
+function getNonOverlappingGroups() {
+    // For rendering purposes, we split the events into groups with no overlap.
+    var eventsByDay = [[],[],[],[],[]]
+    for (var course in selectedOptions) {
+        console.log(courses[course].options[selectedOptions[course]])
+        courses[course].options[selectedOptions[course]].forEach(function(event) {
+            eventsByDay[event.day].push(event)
+        }) 
+    }
+
+    return eventsByDay.map(function(eventsOfDay) {
+        eventsOfDay.sort(function(a, b) {
+            return timeToInt(a.time_from) - timeToInt(b.time_from)
         })
+        var groups = []
+        eventsOfDay.forEach(function(event) {
+            var validGroup = null
+            groups.forEach(function(group) {
+                if (timeToInt(group[group.length - 1].time_to) <= timeToInt(event.time_from)) {
+                    validGroup = group
+                }
+            })
+            if (validGroup) {
+                validGroup.push(event)
+            } else {
+                groups.push([event])
+            }
+        })
+        return groups
+    })
+}
+
+function renderSchedule() {
+    var groupsByDay = getNonOverlappingGroups().map(function(g, i) {
+        return {
+            day: ["Pondělí","Úterý","Středa","Čtvrtek","Pátek"][i],
+            groups: g
+        }
     })
 
-    var oldTbody = document.getElementById("course_table_body")
-    oldTbody.parentNode.replaceChild(tbody, oldTbody)
+    var schedule = document.getElementById("schedule")
+    schedule.innerHTML = scheduleTemplate(groupsByDay)
 }
 
 function setStatusMessage(s) {
@@ -111,8 +174,37 @@ function getTimeString(e) {
     return s
 }
 
-function createSchedule() {
-    console.log(JSON.stringify(Object.values(courses)))
-    //makeHttpRequest("POST", "schedulequery", JSON.stringify(courses), callback)
-    return false
+function timeToInt(s) {
+    // Parses times in the format 09:15
+    return parseInt(s.substring(0,2)) * 60 + parseInt(s.substring(3,5))
 }
+
+function initHandlebars() {
+    Handlebars.registerHelper('all_times', function() {
+        return new Handlebars.SafeString(
+            this.map(getTimeString).join("; ")
+        );
+    });
+
+    Handlebars.registerHelper('event_style', function() {
+        var mint = timeToInt("07:00")
+        var maxt = timeToInt("20:00")
+        var f = timeToInt(this.time_from)
+        var t = timeToInt(this.time_to)
+        var fc = Math.min(1, Math.max(0,(f-mint)/(maxt-mint)))
+        var tc = Math.min(1, Math.max(0,(t-mint)/(maxt-mint)))
+        var formatPercent = function(x) {
+            return (x*100)+"%"
+        }
+        return  "margin-left: " + formatPercent(fc) + 
+                ";width: "+ formatPercent(tc - fc) +";"
+    });
+
+    var source = document.getElementById("course_list_template").innerHTML;
+    courseListTemplate = Handlebars.compile(source);
+    
+    source = document.getElementById("schedule_template").innerHTML;
+    scheduleTemplate = Handlebars.compile(source);
+}
+
+initHandlebars();
