@@ -43,22 +43,39 @@
 
 <script id="schedule_template" type="text/x-handlebars-template">
     <table id="schedule_table">
-        {{#each this}}
         <tr>
-            <td>{{day}}</td>
+            <td>&nbsp;</td>
             <td>
-                {{#each groups}}
-                <span class="group_span">
-                    {{#each this}}
-                        <span class="event_span" style="{{event_style}}">
-                        {{name}}<br>
-                        {{teacher}}
-                        </span>
-                    {{/each}}
-                </span>
+                {{#each timestamps}}
+                <div class="schedule_timestamp" style="left:{{time_to_percent . }}">
+                    {{.}}
+                </div>
                 {{/each}}
             </td>
         </tr>
+        {{#each groupsByDay}}
+        {{#if groups}}
+            {{#each groups}}
+            <tr>
+                <td>
+                    {{#if index}}{{else}}{{../day}}{{/if}}
+                    <br>&nbsp;
+                </td>
+                <td class="schedule_group">
+                    {{#each this}}
+                        <div class="schedule_event" style="{{event_style}}">
+                        {{name}}<br>
+                        {{teacher}}
+                        </div>
+                    {{/each}}
+                </td>
+            </tr>
+            {{/each}}
+        {{else}}
+            <tr>
+                <td>{{day}}<br>&nbsp;</td>
+            </tr>
+        {{/if}}
         {{/each}}
     </table>
 </script>

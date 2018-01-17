@@ -1,3 +1,7 @@
+body {
+    font-family: sans-serif;
+}
+
 .course_header {
     font-weight: bold;
 }
@@ -8,14 +12,36 @@
 
 #schedule_table {
     width: 100%;
-    background: yellow;
+    background: #EEE;
+    position: relative;
+    font-size: 0.8rem;
 }
 
-.group_span {
-    width: 100%;
+#schedule_table td:nth-child(1) {
+    width: 60px;
 }
 
-.event_span {
-    float: left;
-    background: #FFDDDD;
+.schedule_group {
+    position: relative;
 }
+
+.schedule_event {
+    position: absolute;
+    top: 0;
+
+    background: white;
+    padding: 4px;
+    margin: 2px;
+
+    white-space:nowrap;
+    overflow: hidden;
+}
+.schedule_event:hover {
+    overflow: visible;
+}
+
+.schedule_timestamp {
+    position: absolute;
+    top: 0;
+}
+

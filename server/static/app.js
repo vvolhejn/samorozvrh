@@ -35,6 +35,8 @@ function addCourse() {
     return false // prevents default form submission behavior (refreshing the page)
 }
 
+
+
 function makeHttpRequest(method, url, body, callback) {
     // method should be "GET" or "POST"
     var request = new XMLHttpRequest()
@@ -154,9 +156,13 @@ function renderSchedule() {
             groups: g
         }
     })
+    var data = {
+        timestamps: ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00"],
+        groupsByDay: groupsByDay,
+    }
 
     var schedule = document.getElementById("schedule")
-    schedule.innerHTML = scheduleTemplate(groupsByDay)
+    schedule.innerHTML = scheduleTemplate(data)
 }
 
 function setStatusMessage(s) {
@@ -186,18 +192,25 @@ function initHandlebars() {
         );
     });
 
-    Handlebars.registerHelper('event_style', function() {
+    var timeToRatio = function(time) {
         var mint = timeToInt("07:00")
         var maxt = timeToInt("20:00")
-        var f = timeToInt(this.time_from)
-        var t = timeToInt(this.time_to)
-        var fc = Math.min(1, Math.max(0,(f-mint)/(maxt-mint)))
-        var tc = Math.min(1, Math.max(0,(t-mint)/(maxt-mint)))
+        var ratio = Math.min(1, Math.max(0,(time-mint)/(maxt-mint)))
+        return ratio
+    }
+
+    Handlebars.registerHelper('event_style', function() {
+        var fc = timeToRatio(timeToInt(this.time_from))
+        var tc = timeToRatio(timeToInt(this.time_to))
         var formatPercent = function(x) {
             return (x*100)+"%"
         }
-        return  "margin-left: " + formatPercent(fc) + 
-                ";width: "+ formatPercent(tc - fc) +";"
+        return  "left: "  + formatPercent(fc) + 
+                ";width: "+ formatPercent(tc - fc) + ";"
+    });
+
+    Handlebars.registerHelper('time_to_percent', function(timeString) {
+        return (timeToRatio(timeToInt(timeString))*100)+"%"
     });
 
     var source = document.getElementById("course_list_template").innerHTML;
