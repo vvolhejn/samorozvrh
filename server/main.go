@@ -11,18 +11,37 @@ import (
 	"io/ioutil"
 	"net/http"
 	"path"
+	"strings"
 )
 
 var rootDir string
 
 func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Path[len("/sisquery/"):]
-	events, err := sisparse.GetCourseEvents(query)
+	if strings.Contains(query, "/") {
+		fmt.Fprintf(w, `{"error":"Query should not contain slashes"}`)
+		return
+	}
+	var res string
+	var err error
+	fmt.Printf("sisquery: %s", query)
+	if isCached(query) {
+		fmt.Println(" (using cache)")
+		res, err = getCache(query)
+	} else {
+		fmt.Println(" (querying)")
+		events, err := sisparse.GetCourseEvents(query)
+		if err == nil {
+			s, _ := json.Marshal(events)
+			res = fmt.Sprintf(`{"data":%s}`, string(s))
+			err = setCache(query, res)
+		}
+	}
+
 	if err != nil {
 		fmt.Fprintf(w, `{"error":"%s"}`, err)
 	} else {
-		s, _ := json.Marshal(events)
-		fmt.Fprintf(w, `{"data":%s}`, string(s))
+		fmt.Fprint(w, res)
 	}
 }
 
