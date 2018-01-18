@@ -4,21 +4,30 @@ body {
 
 .course_header {
     font-weight: bold;
+    
+}
+
+.course_header td {
+    padding-top: 0.5em;
 }
 
 .selected_course {
-    background-color: #DDD;
+    background-color: #EEF;
 }
 
 #schedule_table {
     width: 100%;
-    background: #EEE;
+    background: #EEF;
     position: relative;
     font-size: 0.8rem;
 }
 
 #schedule_table td:nth-child(1) {
     width: 60px;
+}
+#schedule_table td {
+    padding: 4px;
+    margin: 2px;
 }
 
 .schedule_group {
@@ -29,9 +38,9 @@ body {
     position: absolute;
     top: 0;
 
-    background: white;
     padding: 4px;
     margin: 2px;
+    background: white;
 
     white-space:nowrap;
     overflow: hidden;
@@ -44,4 +53,3 @@ body {
     position: absolute;
     top: 0;
 }
-

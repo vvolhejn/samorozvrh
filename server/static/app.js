@@ -26,7 +26,7 @@ function addCourse() {
             return
         }
         addGroups(response['data'])
-        updateCourses()
+        renderCourseList()
         loadedCourseCodes[courseCode] = true
         setStatusMessage("Přidán předmět " + courseCode)
     }
@@ -34,8 +34,6 @@ function addCourse() {
     makeHttpRequest("GET", "sisquery/" + encodeURIComponent(courseCode), null, callback)
     return false // prevents default form submission behavior (refreshing the page)
 }
-
-
 
 function makeHttpRequest(method, url, body, callback) {
     // method should be "GET" or "POST"
@@ -71,26 +69,62 @@ function addGroup(group) {
         courses[id] = {
             id: id,
             name: name + " (" + ((type==='P') ? "přednáška" : "seminář") + ")",
-            options: []
+            options: [],
+            allowed: true,
         }
     }
+    group.allowed = true
+    // We remember the index so that we can get back to this group when passing a filtered version
+    // of options to the solver
+    group.optionId = courses[id].options.length
     courses[id].options.push(group)
 }
 
-function updateCourses() {
+function renderCourseList() {
     var names = []
     for (var courseId in courses) {
         names.push([courses[courseId].name, courses[courseId]])
     }
     names.sort()
-
+    names = names.map(function(a) {
+        return a[1]
+    })
+    
     var tbody = document.getElementById("course_table_body")
     tbody.innerHTML = courseListTemplate(names)
 }
 
+function handleCheckbox(checkboxId, courseId, index) {
+    if (index === undefined) { // Checkbox for the whole course
+        // If something is checked, uncheck everything, otherwise check everything
+        var checkAll = !courses[courseId].options.some(function(o) {return o.allowed})
+
+        courses[courseId].options.forEach(function(o, i) {
+            document.getElementById(checkboxId + "-" + i).checked = checkAll
+            courses[courseId].options[i].allowed = checkAll
+        })
+        document.getElementById(checkboxId).checked = checkAll
+    } else {
+        courses[courseId].options[index].allowed = document.getElementById(checkboxId).checked
+        document.getElementById(checkboxId.substring(0, checkboxId.length - 2)).checked = 
+            courses[courseId].options.some(function(o) {return o.allowed})
+    }
+}
+
 function createSchedule() {
-    var queryArray = Object.values(courses)
-    
+    var queryArray =
+        Object.values(courses).filter(function(c) {
+            return c.allowed && c.options.some(function(o){return o.allowed})}
+        ).map(function(c) {
+            return {
+                id: c.id,
+                name: c.name,
+                options: c.options.filter(function(o) {
+                    return o.allowed
+                })
+            }
+        })
+
     var callback = function(responseString, error) {
         if (error) {
             setStatusMessage("Nastala chyba: " + error)
@@ -106,13 +140,16 @@ function createSchedule() {
             return
         }
         setStatusMessage("Rozvrh sestaven: " + response["data"])
-        for (var i = 0; i < queryArray.length; i++) {
-            selectedOptions[queryArray[i].id] = response["data"][i]
+        for (var course in courses) {
+            delete selectedOptions[course]
         }
-        updateCourses()
+        for (var i = 0; i < queryArray.length; i++) {
+            selectedOptions[queryArray[i].id] = queryArray[i].options[response["data"][i]].optionId
+        }
+        renderCourseList()
         renderSchedule()
     }
-
+    setStatusMessage("Sestavuji rozvrh")
     makeHttpRequest("POST", "solverquery/", JSON.stringify(queryArray), callback)
     return false
 }
@@ -120,8 +157,8 @@ function createSchedule() {
 function getNonOverlappingGroups() {
     // For rendering purposes, we split the events into groups with no overlap.
     var eventsByDay = [[],[],[],[],[]]
+
     for (var course in selectedOptions) {
-        console.log(courses[course].options[selectedOptions[course]])
         courses[course].options[selectedOptions[course]].forEach(function(event) {
             eventsByDay[event.day].push(event)
         }) 
@@ -191,6 +228,20 @@ function initHandlebars() {
             this.map(getTimeString).join("; ")
         );
     });
+
+    Handlebars.registerHelper('course_allowed', function() {
+        return this.options.some(function(o) {return o.allowed})
+    });
+
+    Handlebars.registerHelper('highlight_selection', function(course) {
+        if (this.optionId === selectedOptions[course]) {
+            return "selected_course"
+        } else {
+            return ""
+        }
+    });
+
+    Handlebars.registerPartial('group_id', '{{@../index}}-{{@index}}')
 
     var timeToRatio = function(time) {
         var mint = timeToInt("07:00")

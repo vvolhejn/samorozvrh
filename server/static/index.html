@@ -29,15 +29,23 @@
 
 <script id="course_list_template" type="text/x-handlebars-template">
     {{#each this}}
-    <tr class="course_header">
-        <td colspan="2">{{this.[0]}}</td>
-    </tr>
-    {{#each this.[1].options}}
-    <tr>
-        <td>{{[0].teacher}}</td>
-        <td>{{all_times}}</td>
-    </tr>
-    {{/each}}
+        <tr class="course_header">
+            <td>
+                <input id="cb{{@index}}" type="checkbox" {{#if (course_allowed)}}checked{{/if}}
+                    onclick="return handleCheckbox('cb{{@index}}', '{{id}}')">
+            </td>
+            <td colspan="2"><label for="cb{{@index}}">{{name}}</td>
+        </tr>
+        {{#each options}}
+            <tr class="{{highlight_selection ../id}}">
+                <td>
+                    <input id="cb{{> group_id}}" type="checkbox" {{#if allowed}}checked{{/if}}
+                        onclick="return handleCheckbox('cb{{> group_id}}', '{{../id}}', {{@index}})">
+                </td>
+                <td><label for="cb{{> group_id}}">{{[0].teacher}}</label></td>
+                <td><label for="cb{{> group_id}}">{{all_times}}</label></td>
+            </tr>
+        {{/each}}
     {{/each}}
 </script>
 
