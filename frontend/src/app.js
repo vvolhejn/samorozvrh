@@ -1,65 +1,45 @@
 "use strict"
 
-
-// require('./lib/handlebars-v4.0.11');
-import Handlebars from './lib/handlebars-v4.0.11';
-// require('handlebars');
+var util = require('./util');
+var view = require('./view');
 
 var courses = {}
 var loadedCourseCodes = {}
 var selectedOptions = {}
-var courseListTemplate, scheduleTemplate
+
+view.initHandlebars(selectedOptions)
 
 export function addCourse() {
     var courseCode = document.getElementById("course_code").value
     if (loadedCourseCodes[courseCode]) {
-        setStatusMessage("Předmět " + courseCode + " už je přidán")
+        view.setStatusMessage("Předmět " + courseCode + " už je přidán")
         return false
     }
     var callback = function(responseString, error) {
         if (error) {
-            setStatusMessage("Nastala chyba: " + error)
+            view.setStatusMessage("Nastala chyba: " + error)
             return
         }
         if (!responseString) {
-            setStatusMessage("Nastala chyba: Server neodpovídá.")
+            view.setStatusMessage("Nastala chyba: Server neodpovídá.")
             return
         }
         var response = JSON.parse(responseString)
         if (response['error']) {
-            setStatusMessage("Nepodařilo se najít předmět " + courseCode + "; je kód zadán správně?")
+            view.setStatusMessage("Nepodařilo se najít předmět " + courseCode + "; je kód zadán správně?")
             return
         }
-        addGroups(response['data'])
-        renderCourseList()
-        loadedCourseCodes[courseCode] = true
-        setStatusMessage("Přidán předmět " + courseCode)
-    }
-    setStatusMessage("Hledám předmět " + courseCode)
-    makeHttpRequest("GET", "sisquery/" + encodeURIComponent(courseCode), null, callback)
-    return false // prevents default form submission behavior (refreshing the page)
-}
-
-function makeHttpRequest(method, url, body, callback) {
-    // method should be "GET" or "POST"
-    var request = new XMLHttpRequest()
-    request.onreadystatechange = function() {
-        if (this.readyState == 4) {
-            if (this.status == 200) {
-                callback(request.responseText, null)
-            } else {
-                callback(null, request.responseText)
-            }
+        // response['data'].forEach()
+        for (var i = 0; i < response['data'].length; i++) {
+            addGroup(response['data'][i])
         }
+        view.renderCourseList(courses)
+        loadedCourseCodes[courseCode] = true
+        view.setStatusMessage("Přidán předmět " + courseCode)
     }
-    request.open(method, url, true)
-    request.send(body)
-}
-
-function addGroups(data) {
-    for (var i = 0; i < data.length; i++) {
-        addGroup(data[i])
-    }
+    view.setStatusMessage("Hledám předmět " + courseCode)
+    util.makeHttpRequest("GET", "sisquery/" + encodeURIComponent(courseCode), null, callback)
+    return false // prevents default form submission behavior (refreshing the page)
 }
 
 function addGroup(group) {
@@ -83,20 +63,6 @@ function addGroup(group) {
     // of options to the solver
     group.optionId = courses[id].options.length
     courses[id].options.push(group)
-}
-
-function renderCourseList() {
-    var names = []
-    for (var courseId in courses) {
-        names.push([courses[courseId].name, courses[courseId]])
-    }
-    names.sort()
-    names = names.map(function(a) {
-        return a[1]
-    })
-    
-    var tbody = document.getElementById("course_table_body")
-    tbody.innerHTML = courseListTemplate(names)
 }
 
 export function handleCheckbox(checkboxId, courseId, index) {
@@ -132,30 +98,30 @@ export function createSchedule() {
 
     var callback = function(responseString, error) {
         if (error) {
-            setStatusMessage("Nastala chyba: " + error)
+            view.setStatusMessage("Nastala chyba: " + error)
             return
         }
         if (!responseString) {
-            setStatusMessage("Nastala chyba: Server neodpovídá.")
+            view.setStatusMessage("Nastala chyba: Server neodpovídá.")
             return
         }
         var response = JSON.parse(responseString)
         if (response['error']) {
-            setStatusMessage("Chyba při tvorbě rozvrhu: " + response['error'])
+            view.setStatusMessage("Chyba při tvorbě rozvrhu: " + response['error'])
             return
         }
-        setStatusMessage("Rozvrh sestaven: " + response["data"])
+        view.setStatusMessage("Rozvrh sestaven: " + response["data"])
         for (var course in courses) {
             delete selectedOptions[course]
         }
         for (var i = 0; i < queryArray.length; i++) {
             selectedOptions[queryArray[i].id] = queryArray[i].options[response["data"][i]].optionId
         }
-        renderCourseList()
-        renderSchedule()
+        view.renderCourseList(courses)
+        view.renderSchedule(getNonOverlappingGroups())
     }
-    setStatusMessage("Sestavuji rozvrh")
-    makeHttpRequest("POST", "solverquery/", JSON.stringify(queryArray), callback)
+    view.setStatusMessage("Sestavuji rozvrh")
+    util.makeHttpRequest("POST", "solverquery/", JSON.stringify(queryArray), callback)
     return false
 }
 
@@ -171,13 +137,13 @@ function getNonOverlappingGroups() {
 
     return eventsByDay.map(function(eventsOfDay) {
         eventsOfDay.sort(function(a, b) {
-            return timeToInt(a.time_from) - timeToInt(b.time_from)
+            return util.timeToInt(a.time_from) - util.timeToInt(b.time_from)
         })
         var groups = []
         eventsOfDay.forEach(function(event) {
             var validGroup = null
             groups.forEach(function(group) {
-                if (timeToInt(group[group.length - 1].time_to) <= timeToInt(event.time_from)) {
+                if (util.timeToInt(group[group.length - 1].time_to) <= util.timeToInt(event.time_from)) {
                     validGroup = group
                 }
             })
@@ -190,90 +156,3 @@ function getNonOverlappingGroups() {
         return groups
     })
 }
-
-function renderSchedule() {
-    var groupsByDay = getNonOverlappingGroups().map(function(g, i) {
-        return {
-            day: ["Pondělí","Úterý","Středa","Čtvrtek","Pátek"][i],
-            groups: g
-        }
-    })
-    var data = {
-        timestamps: ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00","19:00"],
-        groupsByDay: groupsByDay,
-    }
-
-    var schedule = document.getElementById("schedule")
-    schedule.innerHTML = scheduleTemplate(data)
-}
-
-function setStatusMessage(s) {
-    document.getElementById("status").innerHTML = s
-}
-
-function getTimeString(e) {
-    var s = ["Po", "Út", "St", "Čt", "Pá"][e.day]
-    s += " " + e.time_from + "–" + e.time_to
-    if (e.week_parity == 1) {
-        s += " (liché týdny)"
-    } else if (e.week_parity == 2) {
-        s += " (sudé týdny)"
-    }
-    return s
-}
-
-function timeToInt(s) {
-    // Parses times in the format 09:15
-    return parseInt(s.substring(0,2)) * 60 + parseInt(s.substring(3,5))
-}
-
-function initHandlebars() {
-    Handlebars.registerHelper('all_times', function() {
-        return new Handlebars.SafeString(
-            this.map(getTimeString).join("; ")
-        );
-    });
-
-    Handlebars.registerHelper('course_allowed', function() {
-        return this.options.some(function(o) {return o.allowed})
-    });
-
-    Handlebars.registerHelper('highlight_selection', function(course) {
-        if (this.optionId === selectedOptions[course]) {
-            return "selected_course"
-        } else {
-            return ""
-        }
-    });
-
-    Handlebars.registerPartial('group_id', '{{@../index}}-{{@index}}')
-
-    var timeToRatio = function(time) {
-        var mint = timeToInt("07:00")
-        var maxt = timeToInt("20:00")
-        var ratio = Math.min(1, Math.max(0,(time-mint)/(maxt-mint)))
-        return ratio
-    }
-
-    Handlebars.registerHelper('event_style', function() {
-        var fc = timeToRatio(timeToInt(this.time_from))
-        var tc = timeToRatio(timeToInt(this.time_to))
-        var formatPercent = function(x) {
-            return (x*100)+"%"
-        }
-        return  "left: "  + formatPercent(fc) + 
-                ";width: "+ formatPercent(tc - fc) + ";"
-    });
-
-    Handlebars.registerHelper('time_to_percent', function(timeString) {
-        return (timeToRatio(timeToInt(timeString))*100)+"%"
-    });
-
-    var source = document.getElementById("course_list_template").innerHTML;
-    courseListTemplate = Handlebars.compile(source);
-    
-    source = document.getElementById("schedule_template").innerHTML;
-    scheduleTemplate = Handlebars.compile(source);
-}
-
-initHandlebars();
