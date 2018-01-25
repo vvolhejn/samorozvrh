@@ -10,8 +10,13 @@ Standard Go je mít všechny projekty na jednom místě. Bohužel, protože je t
 $GOPATH/src/github.com/iamwave/samorozvrh
 ```
 
-K instalaci by teoreticky mělo stačit spustit z kořenové složky projektu `make`.
-To nainstaluje jak solver, (Pipenv a Google OR Tools) tak server (kompilace Go kódu).
+Frontend vyžaduje webpack, který zase vyžaduje NPM. Lze nainstalovat přes
+```
+npm install webpack
+```
+
+Pak by k instalaci teoreticky mělo stačit spustit z kořenové složky projektu `make`.
+To nainstaluje solver, (Pipenv a Google OR Tools), server (kompilace Go kódu) i frontend (webpackování JS do jednoho souboru).
 
 ## Spouštění
 

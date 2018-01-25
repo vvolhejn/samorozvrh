@@ -9,10 +9,10 @@
 <form>
     Kód předmětu:<br>
     <input type="text" name="course_code" id="course_code" value="NTIN061">
-    <input type="submit" value="Přidat" onclick="return addCourse()">
+    <input type="submit" value="Přidat" onclick="return Samorozvrh.addCourse()">
 </form>
 <form>
-    <input type="submit" value="Sestavit rozvrh" onclick="return createSchedule()">
+    <input type="submit" value="Sestavit rozvrh" onclick="return Samorozvrh.createSchedule()">
 </form>
 <div id="status"></div>
 <hr>
@@ -32,7 +32,7 @@
         <tr class="course_header">
             <td>
                 <input id="cb{{@index}}" type="checkbox" {{#if (course_allowed)}}checked{{/if}}
-                    onclick="return handleCheckbox('cb{{@index}}', '{{id}}')">
+                    onclick="return Samorozvrh.handleCheckbox('cb{{@index}}', '{{id}}')">
             </td>
             <td colspan="2"><label for="cb{{@index}}">{{name}}</td>
         </tr>
@@ -40,7 +40,7 @@
             <tr class="{{highlight_selection ../id}}">
                 <td>
                     <input id="cb{{> group_id}}" type="checkbox" {{#if allowed}}checked{{/if}}
-                        onclick="return handleCheckbox('cb{{> group_id}}', '{{../id}}', {{@index}})">
+                        onclick="return Samorozvrh.handleCheckbox('cb{{> group_id}}', '{{../id}}', {{@index}})">
                 </td>
                 <td><label for="cb{{> group_id}}">{{[0].teacher}}</label></td>
                 <td><label for="cb{{> group_id}}">{{all_times}}</label></td>
@@ -88,6 +88,6 @@
     </table>
 </script>
 
-<script type="text/javascript" src="lib/handlebars-v4.0.11.js"></script>
+<!--<script type="text/javascript" src="lib/handlebars-v4.0.11.js"></script>-->
 <script type="text/javascript" src="app.js"></script>
 </html>

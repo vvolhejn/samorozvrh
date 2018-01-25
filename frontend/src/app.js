@@ -1,11 +1,16 @@
 "use strict"
 
+
+// require('./lib/handlebars-v4.0.11');
+import Handlebars from './lib/handlebars-v4.0.11';
+// require('handlebars');
+
 var courses = {}
 var loadedCourseCodes = {}
 var selectedOptions = {}
 var courseListTemplate, scheduleTemplate
 
-function addCourse() {
+export function addCourse() {
     var courseCode = document.getElementById("course_code").value
     if (loadedCourseCodes[courseCode]) {
         setStatusMessage("Předmět " + courseCode + " už je přidán")
@@ -94,7 +99,7 @@ function renderCourseList() {
     tbody.innerHTML = courseListTemplate(names)
 }
 
-function handleCheckbox(checkboxId, courseId, index) {
+export function handleCheckbox(checkboxId, courseId, index) {
     if (index === undefined) { // Checkbox for the whole course
         // If something is checked, uncheck everything, otherwise check everything
         var checkAll = !courses[courseId].options.some(function(o) {return o.allowed})
@@ -111,7 +116,7 @@ function handleCheckbox(checkboxId, courseId, index) {
     }
 }
 
-function createSchedule() {
+export function createSchedule() {
     var queryArray =
         Object.values(courses).filter(function(c) {
             return c.allowed && c.options.some(function(o){return o.allowed})}

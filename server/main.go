@@ -14,6 +14,8 @@ import (
 	"strings"
 )
 
+const FRONTEND_DIR = "frontend/dist"
+
 var rootDir string
 
 func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +77,7 @@ func main() {
 	http.HandleFunc("/sisquery/", sisQueryHandler)
 	http.HandleFunc("/solverquery/", solverQueryHandler)
 
-	fs := http.FileServer(http.Dir(path.Join(rootDir, "server/static")))
+	fs := http.FileServer(http.Dir(path.Join(rootDir, FRONTEND_DIR)))
 	http.Handle("/", fs)
 
 	fmt.Println("Listening on :8080")

@@ -1,1 +1,4 @@
 *.sublime-*
+
+# Directory created by server for caching loaded courses
+cache/
