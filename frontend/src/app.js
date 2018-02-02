@@ -2,6 +2,7 @@
 
 var util = require('./util');
 var view = require('./view');
+var backendQuery = require('./backendQuery');
 
 var courses = {}
 var loadedCourseCodes = {}
@@ -15,30 +16,18 @@ export function addCourse() {
         view.setStatusMessage("Předmět " + courseCode + " už je přidán")
         return false
     }
-    var callback = function(responseString, error) {
-        if (error) {
-            view.setStatusMessage("Nastala chyba: " + error)
-            return
+    backendQuery.addCourse(courseCode, function(res, err) {
+        if (err) {
+            view.setStatusMessage("Chyba: " + err)
+        } else {
+            res.forEach(addGroup)
+            view.renderCourseList(courses)
+            loadedCourseCodes[courseCode] = true
+            view.setStatusMessage("Přidán předmět " + courseCode)
         }
-        if (!responseString) {
-            view.setStatusMessage("Nastala chyba: Server neodpovídá.")
-            return
-        }
-        var response = JSON.parse(responseString)
-        if (response['error']) {
-            view.setStatusMessage("Nepodařilo se najít předmět " + courseCode + "; je kód zadán správně?")
-            return
-        }
-        // response['data'].forEach()
-        for (var i = 0; i < response['data'].length; i++) {
-            addGroup(response['data'][i])
-        }
-        view.renderCourseList(courses)
-        loadedCourseCodes[courseCode] = true
-        view.setStatusMessage("Přidán předmět " + courseCode)
-    }
+    })
     view.setStatusMessage("Hledám předmět " + courseCode)
-    util.makeHttpRequest("GET", "sisquery/" + encodeURIComponent(courseCode), null, callback)
+
     return false // prevents default form submission behavior (refreshing the page)
 }
 
@@ -82,7 +71,10 @@ export function handleCheckbox(checkboxId, courseId, index) {
     }
 }
 
+// Called when the "sestavit rozvrh" button is pressed
 export function createSchedule() {
+    view.setStatusMessage("Sestavuji rozvrh")
+
     var queryArray =
         Object.values(courses).filter(function(c) {
             return c.allowed && c.options.some(function(o){return o.allowed})}
@@ -96,33 +88,23 @@ export function createSchedule() {
             }
         })
 
-    var callback = function(responseString, error) {
-        if (error) {
-            view.setStatusMessage("Nastala chyba: " + error)
-            return
+    backendQuery.createSchedule(queryArray, function(res, err) {
+        if (err) {
+            view.setStatusMessage("Chyba: " + err)
+        } else {
+            view.setStatusMessage("Rozvrh sestaven: " + res)
+            for (var course in courses) {
+                delete selectedOptions[course]
+            }
+            for (var i = 0; i < queryArray.length; i++) {
+                selectedOptions[queryArray[i].id] = queryArray[i].options[res[i]].optionId
+            }
+            view.renderCourseList(courses)
+            view.renderSchedule(getNonOverlappingGroups())
         }
-        if (!responseString) {
-            view.setStatusMessage("Nastala chyba: Server neodpovídá.")
-            return
-        }
-        var response = JSON.parse(responseString)
-        if (response['error']) {
-            view.setStatusMessage("Chyba při tvorbě rozvrhu: " + response['error'])
-            return
-        }
-        view.setStatusMessage("Rozvrh sestaven: " + response["data"])
-        for (var course in courses) {
-            delete selectedOptions[course]
-        }
-        for (var i = 0; i < queryArray.length; i++) {
-            selectedOptions[queryArray[i].id] = queryArray[i].options[response["data"][i]].optionId
-        }
-        view.renderCourseList(courses)
-        view.renderSchedule(getNonOverlappingGroups())
-    }
-    view.setStatusMessage("Sestavuji rozvrh")
-    util.makeHttpRequest("POST", "solverquery/", JSON.stringify(queryArray), callback)
-    return false
+    })
+
+    return false // prevents default form submission behavior (refreshing the page)
 }
 
 function getNonOverlappingGroups() {
