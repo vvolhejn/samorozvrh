@@ -97,7 +97,9 @@ export function createSchedule() {
                 delete selectedOptions[course]
             }
             for (var i = 0; i < queryArray.length; i++) {
-                selectedOptions[queryArray[i].id] = queryArray[i].options[res[i]].optionId
+                if (res[i] !== null) { // if null, the course is not selected
+                    selectedOptions[queryArray[i].id] = queryArray[i].options[res[i]].optionId
+                }
             }
             view.renderCourseList(courses)
             view.renderSchedule(getNonOverlappingGroups())
