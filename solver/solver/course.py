@@ -2,13 +2,17 @@ import calendar
 from datetime import time, date, datetime, timedelta
 
 
+DEFAULT_COURSE_REWARD = 1
+
+
 class Course:
 
     options = []  # type: List[List[Event]]
 
-    def __init__(self, options=[], name=None):
+    def __init__(self, options=[], name=None, reward=DEFAULT_COURSE_REWARD):
         self.options = options
         self.name = name
+        self.reward = reward
 
     def __repr__(self):
         return str(self.options)
@@ -45,11 +49,12 @@ def load_course_array(json_obj):
 def load_course(json_obj):
     try:
         name = json_obj["name"]
+        reward = json_obj.get("reward", DEFAULT_COURSE_REWARD)
         options = []
         for opt in json_obj["options"]:
             options.append([load_event(e) for e in opt])
 
-        return Course(options, name=name)
+        return Course(options, name=name, reward=reward)
     except KeyError as e:
         raise ValueError("Missing field in course JSON object: {}".format(e))
 

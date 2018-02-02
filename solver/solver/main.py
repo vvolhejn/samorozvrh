@@ -21,7 +21,8 @@ def main():
     for selection in solver.solve(courses):
         events = []
         for c, opt_index in zip(courses, selection):
-            events.extend(c.options[opt_index])
+            if opt_index != None:
+                events.extend(c.options[opt_index])
 
         if args.debug:
             print(schedule_to_string(events))

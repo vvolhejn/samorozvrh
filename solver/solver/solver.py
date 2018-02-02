@@ -19,36 +19,59 @@ def solve(courses):
 
     flat_vars = []
     flat_vars_inverse = []
+    reward_exprs = []  # The solver tries to maximize the sum of this array
 
     for course_index, course in enumerate(courses):
-        course_vars = create_course_variables(solver, course)
+        course_vars, reward_expr = create_course_variables(solver, course)
+        reward_exprs.append(reward_expr)
         flat_vars.extend([v for v, _ in course_vars])
         flat_vars_inverse.extend([(course_index, opt_index) for _, opt_index in course_vars])
 
     sequences_for_day = create_disjunctive_constraints(solver, flat_vars)
 
-    collector = solver.AllSolutionCollector()
-    # This makes it so that we can query the collector for the variables' values
-    collector.Add(flat_vars)
+    # AllSolutionCollector to see all solutions
+    collector = solver.BestValueSolutionCollector(True)  # True means maximize
+    collector.Add(flat_vars)  # Make the collector remember the variables' values in solutions
+
+    obj_var = solver.Sum(reward_exprs)
+    collector.AddObjective(obj_var)  # Make the collector remember the objective value
+    # Consider WeightedMinimize for a more complex objective
+    objective_monitor = solver.Maximize(obj_var, 1)
 
     sequence_phase = solver.Phase(sequences_for_day, solver.SEQUENCE_DEFAULT)
     interval_phase = solver.Phase(flat_vars, solver.INTERVAL_DEFAULT)
-    main_phase = solver.Compose([sequence_phase,
-                                 interval_phase])
+    minimize_phase = solver.Phase([obj_var],
+                                  solver.CHOOSE_FIRST_UNBOUND,
+                                  solver.ASSIGN_MIN_VALUE)
 
+    # It seems that both interval_phase and minimize_phase can be omitted?
+    main_phase = solver.Compose([sequence_phase,
+                                 interval_phase,
+                                 minimize_phase])
+
+    # Stop the solver after a fixed time / number of found solutions
     time_limit_ms = solver.TimeLimit(TIME_LIMIT_MS)
     solutions_limit = solver.SolutionsLimit(SOLUTIONS_LIMIT)
 
-    ok = solver.Solve(main_phase, [time_limit_ms, solutions_limit, collector])
+    ok = solver.Solve(
+        main_phase,
+        [
+            time_limit_ms,
+            solutions_limit,
+            objective_monitor,
+            collector,
+        ])
+
     logger.info("Time: {} ms".format(solver.WallTime()))
     if not ok:
-        logger.warning("No solution was found or an error occurred.")
+        logger.warning("No solution was found or an error occurred in the solver.")
         return
 
     logger.info("Number of solutions: {}".format(collector.SolutionCount()))
 
     for solution_index in range(collector.SolutionCount()):
-        logger.info("Solution {}".format(solution_index))
+        logger.info("Solution {} (reward {})".format(solution_index,
+                                                     collector.ObjectiveValue(solution_index)))
         yield _solution_to_selection(collector, solution_index,
                                      flat_vars, flat_vars_inverse, len(courses))
 
@@ -59,9 +82,8 @@ def _solution_to_selection(collector, solution_index, flat_vars, flat_vars_inver
     for j in range(len(flat_vars)):
         if collector.PerformedValue(solution_index, flat_vars[j]):
             course_index, opt_index = flat_vars_inverse[j]
-
-            if selection[course_index] and selection[course_index] != opt_index:
-                raise RuntimeError("Multiple options were chosen for"
+            if (selection[course_index] != None) and (selection[course_index] != opt_index):
+                raise RuntimeError("Multiple options were chosen for "
                                    "course {} ".format(course_index))
 
             selection[course_index] = opt_index
@@ -71,7 +93,9 @@ def _solution_to_selection(collector, solution_index, flat_vars, flat_vars_inver
 
 def create_course_variables(solver, course):
     """
-    Given a course, returns a (flat) list of variables corresponding to the course's events.
+    Given a course, returns a pair of:
+    - a (flat) list of variables corresponding to the course's events.
+    - an expression representing the reward for the course (course.reward if selected, 0 if not)
     Appropriate constraints are added to make the solver pick exactly one option.
     """
     variables = []
@@ -104,10 +128,10 @@ def create_course_variables(solver, course):
         # One variable from each option
         representatives.append(opt_variables[0])
 
-    # Pick exactly one option
-    solver.Add(solver.SumEquality([r.PerformedExpr() for r in representatives], 1))
+    # Pick at most one option (exactly one: SumEquality)
+    solver.Add(solver.SumLessOrEqual([r.PerformedExpr() for r in representatives], 1))
 
-    return variables
+    return variables, course.reward * solver.Sum([r.PerformedExpr() for r in representatives])
 
 
 def create_disjunctive_constraints(solver, flat_vars):
