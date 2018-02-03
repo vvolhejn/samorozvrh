@@ -17,6 +17,14 @@ export function renderCourseList(courses) {
     
     var tbody = document.getElementById("course_table_body")
     tbody.innerHTML = courseListTemplate(names)
+
+    // Set the radio buttons to the previously set value
+    for (var i = 0; i < names.length; i++) {
+        var priority = names[i].priority || 2
+        var id = "radio" + priority + i
+        var radio = document.getElementById(id)
+        radio.checked = true
+    }
 }
 
 export function renderSchedule(groupsByDay) {
@@ -59,7 +67,6 @@ export function initHandlebars(selectedOptions) {
     });
 
     Handlebars.registerPartial('group_id', '{{@../index}}-{{@index}}')
-
 
     Handlebars.registerHelper('event_style', function() {
         var fc = util.timeToRatio(util.timeToInt(this.time_from))

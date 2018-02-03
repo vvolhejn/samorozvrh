@@ -6,25 +6,32 @@
 </head>
 <body>
 
-<form>
-    Kód předmětu:<br>
-    <input type="text" name="course_code" id="course_code" value="NTIN061">
-    <input type="submit" value="Přidat" onclick="return Samorozvrh.addCourse()">
-</form>
-<form>
-    <input type="submit" value="Sestavit rozvrh" onclick="return Samorozvrh.createSchedule()">
-</form>
-<div id="status"></div>
-<hr>
-<div id="courses">
-    <table id="course_table">
-        <thead></thead>
-        <tbody id="course_table_body">
-        </tbody>
-    </table>
+<div id="left">
+    <h1>Samorozvrh</h1>
+    <form>
+        Kód předmětu:<br>
+        <input type="text" name="course_code" id="course_code" value="NTIN061">
+        <input type="submit" value="Přidat" onclick="return Samorozvrh.addCourse()">
+    </form>
+    <form>
+        <input type="submit" value="Sestavit rozvrh" onclick="return Samorozvrh.createSchedule()">
+    </form>
+    <div id="status"></div>
+    <hr>
+    <div id="schedule">
+    </div>
 </div>
-<div id="schedule">
+
+<div id="right">
+    <div id="courses">
+        <table id="course_table">
+            <thead></thead>
+            <tbody id="course_table_body">
+            </tbody>
+        </table>
+    </div>
 </div>
+
 </body>
 
 <script id="course_list_template" type="text/x-handlebars-template">
@@ -35,6 +42,18 @@
                     onclick="return Samorozvrh.handleCheckbox('cb{{@index}}', '{{id}}')">
             </td>
             <td colspan="2"><label for="cb{{@index}}">{{name}}</td>
+        </tr>
+        <tr>
+            <td colspan="2" class="pr_cell">
+                Priorita:
+                <input class="pr_radio" type="radio" value="1" name="radiogroup{{@index}}" id="radio1{{@index}}"
+                    onclick="return Samorozvrh.handlePriorityChange('{{id}}', 1)">
+                <label for="radio1{{@index}}" class="pr_label1"></label>
+                <input class="pr_radio" type="radio" value="2" name="radiogroup{{@index}}" id="radio2{{@index}}"
+                    onclick="return Samorozvrh.handlePriorityChange('{{id}}', 2)"><label for="radio2{{@index}}" class="pr_label2"></label>
+                <input class="pr_radio" type="radio" value="3" name="radiogroup{{@index}}" id="radio3{{@index}}"
+                    onclick="return Samorozvrh.handlePriorityChange('{{id}}', 3)"><label for="radio3{{@index}}" class="pr_label3"></label>
+            </td>
         </tr>
         {{#each options}}
             <tr class="{{highlight_selection ../id}}">

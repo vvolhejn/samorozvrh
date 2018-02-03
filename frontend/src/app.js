@@ -4,7 +4,9 @@ var util = require('./util');
 var view = require('./view');
 var backendQuery = require('./backendQuery');
 
-var courses = {}
+var REWARDS = [1,100,10000]
+
+export var courses = {}
 var loadedCourseCodes = {}
 var selectedOptions = {}
 
@@ -54,6 +56,47 @@ function addGroup(group) {
     courses[id].options.push(group)
 }
 
+// Called when the "sestavit rozvrh" button is pressed
+export function createSchedule() {
+    view.setStatusMessage("Sestavuji rozvrh")
+
+    var queryArray =
+        Object.values(courses).filter(function(c) {
+            return c.allowed && c.options.some(function(o){return o.allowed})}
+        ).map(function(c) {
+            return {
+                id: c.id,
+                name: c.name,
+                reward: REWARDS[(c.priority || 2) - 1],
+                options: c.options.filter(function(o) {
+                    return o.allowed
+                })
+            }
+        })
+
+    backendQuery.createSchedule(queryArray, function(res, err) {
+        if (err) {
+            view.setStatusMessage("Chyba: " + err)
+        } else {
+            var nSelected = res.filter(function(x){return x !== null}).length
+            view.setStatusMessage("Rozvrh sestaven (počet předmětů: " + nSelected + ")")
+            for (var course in courses) {
+                delete selectedOptions[course]
+            }
+            for (var i = 0; i < queryArray.length; i++) {
+                if (res[i] !== null) { // if null, the course is not selected
+                    selectedOptions[queryArray[i].id] = queryArray[i].options[res[i]].optionId
+                }
+            }
+            view.renderCourseList(courses)
+            view.renderSchedule(getNonOverlappingGroups())
+        }
+    })
+
+    return false // prevents default form submission behavior (refreshing the page)
+}
+
+
 export function handleCheckbox(checkboxId, courseId, index) {
     if (index === undefined) { // Checkbox for the whole course
         // If something is checked, uncheck everything, otherwise check everything
@@ -71,46 +114,14 @@ export function handleCheckbox(checkboxId, courseId, index) {
     }
 }
 
-// Called when the "sestavit rozvrh" button is pressed
-export function createSchedule() {
-    view.setStatusMessage("Sestavuji rozvrh")
-
-    var queryArray =
-        Object.values(courses).filter(function(c) {
-            return c.allowed && c.options.some(function(o){return o.allowed})}
-        ).map(function(c) {
-            return {
-                id: c.id,
-                name: c.name,
-                options: c.options.filter(function(o) {
-                    return o.allowed
-                })
-            }
-        })
-
-    backendQuery.createSchedule(queryArray, function(res, err) {
-        if (err) {
-            view.setStatusMessage("Chyba: " + err)
-        } else {
-            view.setStatusMessage("Rozvrh sestaven: " + res)
-            for (var course in courses) {
-                delete selectedOptions[course]
-            }
-            for (var i = 0; i < queryArray.length; i++) {
-                if (res[i] !== null) { // if null, the course is not selected
-                    selectedOptions[queryArray[i].id] = queryArray[i].options[res[i]].optionId
-                }
-            }
-            view.renderCourseList(courses)
-            view.renderSchedule(getNonOverlappingGroups())
-        }
-    })
-
-    return false // prevents default form submission behavior (refreshing the page)
+export function handlePriorityChange(courseId, priority) {
+    courses[courseId].priority = priority
 }
 
 function getNonOverlappingGroups() {
     // For rendering purposes, we split the events into groups with no overlap.
+    // Perhaps premature optimization, this is in case we want to allow the solver
+    // to let some events overlap.
     var eventsByDay = [[],[],[],[],[]]
 
     for (var course in selectedOptions) {

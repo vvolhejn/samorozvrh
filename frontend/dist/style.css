@@ -2,9 +2,31 @@ body {
     font-family: sans-serif;
 }
 
+#left {
+    position: fixed;
+    width: 49%;
+    height: 100%;
+    margin-right: 30px;
+}
+
+h1 {
+    text-align: center;
+}
+
+#right {
+    width: 49%;
+    height: auto;
+    position: absolute;
+    right: 0;
+    padding-left: 30px;
+}
+
+#course_table {
+    width: 100%;
+}
+
 .course_header {
     font-weight: bold;
-    
 }
 
 .course_header td {
@@ -13,6 +35,37 @@ body {
 
 .selected_course {
     background-color: #EEF;
+}
+
+.pr_radio:not(old) {
+    width: 16px;
+    margin: 0;
+    padding: 0;
+    opacity: 0;
+}
+
+.pr_radio + label {
+    background-repeat: no-repeat;
+    padding: 4px;
+    background-position: 2px 2px;
+    display: inline-block;
+    margin-left: -16px;
+    padding-left: 16px;
+    background-size: 16px 16px;
+    height: 16px;
+}
+
+.pr_radio:checked + label {
+    background-color: #CCC;
+}
+
+.pr_label1 { background-image: url('img/p1.png'); }
+.pr_label2 { background-image: url('img/p2.png'); }
+.pr_label3 { background-image: url('img/p3.png'); }
+
+.pr_cell {
+    font-style: italic;
+    vertical-align: middle;
 }
 
 #schedule_table {
@@ -25,6 +78,7 @@ body {
 #schedule_table td:nth-child(1) {
     width: 60px;
 }
+
 #schedule_table td {
     padding: 4px;
     margin: 2px;
@@ -47,6 +101,7 @@ body {
 }
 .schedule_event:hover {
     overflow: visible;
+    z-index: 100;
 }
 
 .schedule_timestamp {
