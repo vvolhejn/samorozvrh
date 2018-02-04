@@ -3,6 +3,7 @@ from datetime import time, date, datetime, timedelta
 
 
 def schedule_to_string(events):
+    # Pretty-print the schedule given by a list of events.
     lines = []
     events_for_day = [[] for _ in range(5)]
 
@@ -34,7 +35,7 @@ def schedule_to_string(events):
         lines.append(day_string)
     lines.append('=' * LEN)
 
-    return "\n".join(lines)
+    return "\n" + "\n".join(lines)
 
 
 def _replace_string_part(s, t, i_from):
@@ -56,7 +57,9 @@ def _get_weighted_average_time(t1, t2, weight):
 
 
 def _time_to_position(t_min, t_max, t):
-    # TODO: More reasonable name
+    """
+    Return x such that t=(x*t_min + (1-x)*t_max)
+    """
     whole_delta = _time_to_datetime(t_max) - _time_to_datetime(t_min)
     part_delta = _time_to_datetime(t) - _time_to_datetime(t_min)
 

@@ -8,7 +8,9 @@ import solver
 
 
 def main():
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description=(
+        "Samorozvrh solver - given a JSON file containing course data, "
+        "computes a schedule to maximize weighted sum of selected courses."))
     parser.add_argument("file")
     parser.add_argument("--debug", action="store_true")
     args = parser.parse_args()
@@ -24,11 +26,12 @@ def main():
             if opt_index != None:
                 events.extend(c.options[opt_index])
 
-        if args.debug:
-            print(schedule_to_string(events))
+        logging.info(schedule_to_string(events))
 
         print(json.dumps({"data": selection}))
+
         if not args.debug:
+            # Print all solutions in debug mode, just one normally
             return
 
 if __name__ == '__main__':

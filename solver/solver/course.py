@@ -1,13 +1,15 @@
+"""
+Terms such as course, option, event, reward are explained in README.md
+"""
 import calendar
 from datetime import time, date, datetime, timedelta
-
 
 DEFAULT_COURSE_REWARD = 1
 
 
 class Course:
 
-    options = []  # type: List[List[Event]]
+    options = []
 
     def __init__(self, options=[], name=None, reward=DEFAULT_COURSE_REWARD):
         self.options = options
@@ -30,7 +32,7 @@ class Event:
         self.day = day
         self.time_from = time_from
         self.time_to = time_to
-        self.week_parity = week_parity
+        self.week_parity = week_parity  # 0: both weeks, 1: odd weeks, 2: even weeks
         self.name = name
 
     def __repr__(self):
@@ -47,6 +49,7 @@ def load_course_array(json_obj):
 
 
 def load_course(json_obj):
+    # Given a course in a JSON object, return the corresponding Course instance
     try:
         name = json_obj["name"]
         reward = json_obj.get("reward", DEFAULT_COURSE_REWARD)
@@ -60,6 +63,7 @@ def load_course(json_obj):
 
 
 def load_event(json_obj):
+    # Given an event in a JSON object, return the corresponding Event instance
     try:
         day = json_obj["day"]
         time_from = _parse_time(json_obj["time_from"])

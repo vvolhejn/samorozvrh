@@ -19,7 +19,7 @@ def solve(courses):
 
     flat_vars = []
     flat_vars_inverse = []
-    reward_exprs = []  # The solver tries to maximize the sum of this array
+    reward_exprs = []  # The solver tries to maximize the sum of the expressions in this array
 
     for course_index, course in enumerate(courses):
         course_vars, reward_expr = create_course_variables(solver, course)
@@ -29,14 +29,13 @@ def solve(courses):
 
     sequences_for_day = create_disjunctive_constraints(solver, flat_vars)
 
-    # AllSolutionCollector to see all solutions
-    collector = solver.BestValueSolutionCollector(True)  # True means maximize
+    # Note: Use AllSolutionCollector to see all solutions rather than the best
+    collector = solver.BestValueSolutionCollector(True)  # True means to choose the maximum, not minimum
     collector.Add(flat_vars)  # Make the collector remember the variables' values in solutions
 
     obj_var = solver.Sum(reward_exprs)
     collector.AddObjective(obj_var)  # Make the collector remember the objective value
-    # Consider WeightedMinimize for a more complex objective
-    objective_monitor = solver.Maximize(obj_var, 1)
+    objective_monitor = solver.Maximize(obj_var, 1)  # To make the solver care about the objective
 
     sequence_phase = solver.Phase(sequences_for_day, solver.SEQUENCE_DEFAULT)
     interval_phase = solver.Phase(flat_vars, solver.INTERVAL_DEFAULT)
@@ -77,6 +76,11 @@ def solve(courses):
 
 
 def _solution_to_selection(collector, solution_index, flat_vars, flat_vars_inverse, n_courses):
+    """
+    Given a solution found by the solver, extract the list of indices of selected options.
+    Specifically, if selection[i]=j, the j-th option of the i-th course was selected,
+    selection[i]=None if the course was not selected.
+    """
     selection = [None] * n_courses
 
     for j in range(len(flat_vars)):
