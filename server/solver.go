@@ -2,8 +2,6 @@
 package main
 
 import (
-	"fmt"
-	// "io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -14,6 +12,9 @@ import (
 const SOLVER_COMMAND = "python3 -m pipenv run python solver/main.py"
 
 func Solve(query []byte) ([]byte, error) {
+	// Create a temporary file with the query, feed it to the solver
+	// and run it
+
 	tempfile, err := createQueryFile(query)
 	if err != nil {
 		return nil, err
@@ -22,10 +23,10 @@ func Solve(query []byte) ([]byte, error) {
 
 	commandParts := strings.Split(SOLVER_COMMAND+" "+tempfile.Name(), " ")
 	subProcess := exec.Command(commandParts[0], commandParts[1:]...)
-
+	// Run relative to the directory given by -rootdir
 	subProcess.Dir = path.Join(rootDir, "solver")
+
 	res, err := subProcess.CombinedOutput()
-	fmt.Println(string(res))
 	if err != nil {
 		return nil, err
 	}

@@ -5,7 +5,7 @@ Automatická tvorba rozvhu pro studenty Univerzity Karlovy
 Instalace předpokládá, že je nainstalované Go.
 
 ```
-go get github.com/src/github.com/iamwave/samorozvrh
+go get github.com/src/github.com/iamwave/samorozvrh/server
 ```
 
 Tím se projekt `git clone`uje do `$GOPATH/src/github.com/iamwave/samorozvrh` a zkompiluje se Go kód.
