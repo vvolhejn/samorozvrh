@@ -1,16 +1,18 @@
-# samorozvrh
+# Samorozvrh
 Automatická tvorba rozvhu pro studenty Univerzity Karlovy
 
 ## Instalace
+Instalace předpokládá, že je nainstalované Go.
 
-Server je napsaný v Go, solver v Pythonu 3 (takže moc instalace nepotřebuje).
-
-Standard Go je mít všechny projekty na jednom místě. Bohužel, protože je tento projekt vícejazyčný, znamená to, že musíme všechno nainstalovat na místo, kde to očekává Go. Proto je potřeba projekt `git clone`ovat do složky
 ```
-$GOPATH/src/github.com/iamwave/samorozvrh
+go get github.com/src/github.com/iamwave/samorozvrh
 ```
 
-Frontend vyžaduje webpack, který zase vyžaduje NPM. Lze nainstalovat přes
+Tím se projekt `git clone`uje do `$GOPATH/src/github.com/iamwave/samorozvrh` a zkompiluje se Go kód.
+
+Solver vyžaduje **Python 3**.
+Frontend vyžaduje **Webpack**, který zase vyžaduje **npm**. Webpack lze nainstalovat přes
+
 ```
 npm install webpack
 ```
@@ -20,9 +22,9 @@ To nainstaluje solver, (Pipenv a Google OR Tools), server (kompilace Go kódu) i
 
 ## Spouštění
 
-Server je potřeba spouštět z kořene projektu, tj. `$GOPATH/src/github.com/iamwave/samorozvrh`.
-Cesty ke zdrojům, jako statické stránky a umístění solveru, jsou totiž relativní.
-Server zapneme tímto příkazem:
 ```
 $GOPATH/bin/server
 ```
+
+Server je potřeba spouštět z kořene projektu, tj. `$GOPATH/src/github.com/iamwave/samorozvrh`, nebo zadat tuto cestu jako argument `-rootdir`.
+Cesty ke zdrojům, jako statické stránky a umístění solveru, jsou totiž relativní.

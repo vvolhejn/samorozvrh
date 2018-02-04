@@ -1,4 +1,9 @@
 all: install-server
 
-install-server:
-	go install github.com/iamwave/samorozvrh/server
+url:=github.com/iamwave/samorozvrh/server
+
+install-server: get-server
+	go install $(url)
+
+get-server:
+	go get $(url)
