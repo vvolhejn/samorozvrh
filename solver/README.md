@@ -5,13 +5,15 @@ Uses Google OR Tools to create a schedule according to the given parameters.
 See `fixtures/example.json` for an example.
 
 The format in pseudo-JSON (with comments):
-```JSON
+```js
 [                           // List of courses from which to select
   {
     "name": "course_name",  // For display purposes
     "reward": 100,          // The solver tries to maximize the sum of the rewards of selected courses
-    "options": [            // Each course may have multiple options; to select this course, you can select any of these
-      [                     // Each option is an array of events - selecting the option means selecting all of its events
+    // Each course may have multiple options; to select this course, you can select any one of these
+    "options": [            
+    // Each option is an array of events - selecting the option means selecting all of its events
+      [                     
         {
           "day": 0,         // Days are indexed from 0 to 4 (mon-fri)
           "time_from": "12:00",
