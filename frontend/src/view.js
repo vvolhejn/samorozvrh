@@ -6,21 +6,14 @@ var util = require('./util');
 var courseListTemplate, scheduleTemplate
 
 export function renderCourseList(courses) {
-    var names = []
-    for (var courseId in courses) {
-        names.push([courses[courseId].name, courses[courseId]])
-    }
-    names.sort()
-    names = names.map(function(a) {
-        return a[1]
-    })
+    var sortedCourses = util.sortCourses(courses)
     
     var tbody = document.getElementById("course_table_body")
-    tbody.innerHTML = courseListTemplate(names)
+    tbody.innerHTML = courseListTemplate(sortedCourses)
 
     // Set the radio buttons to the previously set value
-    for (var i = 0; i < names.length; i++) {
-        var priority = names[i].priority || 2
+    for (var i = 0; i < sortedCourses.length; i++) {
+        var priority = sortedCourses[i].priority || 2
         var id = "radio" + priority + i
         var radio = document.getElementById(id)
         radio.checked = true

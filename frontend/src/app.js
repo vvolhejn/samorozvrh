@@ -3,6 +3,9 @@
 var util = require('./util');
 var view = require('./view');
 var backendQuery = require('./backendQuery');
+import Cookies from './lib/js-cookie';
+
+export var a = Cookies;
 
 var REWARDS = [1,100,10000]
 
@@ -10,7 +13,20 @@ export var courses = {}
 var loadedCourseCodes = {}
 var selectedOptions = {}
 
-view.initHandlebars(selectedOptions)
+loadFromCookies();
+view.initHandlebars(selectedOptions);
+view.renderCourseList(courses)
+
+export function clearAll() {
+    if(window.confirm("Opravdu smazat vše?")) {
+        courses = {}
+        loadedCourseCodes = {}
+        selectedOptions = {}
+        saveToCookies()
+    }
+    view.renderCourseList();
+    return false
+}
 
 export function addCourse() {
     var courseCode = document.getElementById("course_code").value
@@ -25,6 +41,7 @@ export function addCourse() {
             res.forEach(addGroup)
             view.renderCourseList(courses)
             loadedCourseCodes[courseCode] = true
+            saveToCookies()
             view.setStatusMessage("Přidán předmět " + courseCode)
         }
     })
@@ -112,10 +129,12 @@ export function handleCheckbox(checkboxId, courseId, index) {
         document.getElementById(checkboxId.substring(0, checkboxId.length - 2)).checked = 
             courses[courseId].options.some(function(o) {return o.allowed})
     }
+    saveToCookies()
 }
 
 export function handlePriorityChange(courseId, priority) {
     courses[courseId].priority = priority
+    saveToCookies()
 }
 
 function getNonOverlappingGroups() {
@@ -150,4 +169,58 @@ function getNonOverlappingGroups() {
         })
         return groups
     })
+}
+
+function loadFromCookies() {
+    var loadedFromCookies = Cookies.getJSON("loadedCourseCodes")
+    if (loadFromCookies === undefined) {
+        return
+    }
+    loadedCourseCodes = loadedFromCookies
+
+    var after = function() {
+        var priorities = Cookies.getJSON("priorities")
+        var allowed = Cookies.getJSON("allowed")
+        if(priorities === undefined) return
+        if(allowed === undefined) return
+
+        var sorted = util.sortCourses(courses)
+        sorted.forEach(function(c, i) {
+            c.priority = priorities[i]
+            c.options.forEach(function(o, j) {
+                o.allowed = allowed[i][j]
+            })
+        })
+    }
+
+    var remain = Object.keys(loadedCourseCodes).length // A primitive Promise substitute.
+    for (var code in loadedCourseCodes) {
+        backendQuery.addCourse(code, function(res, err) {
+            remain--
+            if (!err) {
+                res.forEach(addGroup)
+            } else {
+                console.error("Error in loading from cookies")
+                console.error(err)
+            }
+            if (remain == 0) {
+                after()
+            }
+            view.renderCourseList(courses)
+        })
+    }
+}
+
+function saveToCookies() {
+    var COOKIE_DAYS = 100
+
+    Cookies.set("loadedCourseCodes", loadedCourseCodes, { expires: COOKIE_DAYS })
+    var sorted = util.sortCourses(courses)
+    var priorities = sorted.map(function(c) { return c.priority || 2 })
+    Cookies.set("priorities", priorities, { expires: COOKIE_DAYS })
+
+    var allowed = sorted.map(function(c) {
+        return c.options.map(function(o) { return o.allowed })
+    })
+    Cookies.set("allowed", allowed, { expires: COOKIE_DAYS })
 }

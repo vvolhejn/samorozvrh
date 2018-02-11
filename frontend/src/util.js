@@ -39,3 +39,16 @@ export function timeToRatio(time) {
     var ratio = Math.min(1, Math.max(0,(time-mint)/(maxt-mint)))
     return ratio
 }
+
+export function sortCourses(courses) {
+    // Given an object containing courses, returns an array of courses
+    // sorted alphabetically by their name.
+    var coursesWithNames = []
+    for (var courseId in courses) {
+        coursesWithNames.push([courses[courseId].name, courses[courseId]])
+    }
+    coursesWithNames.sort()
+    return coursesWithNames.map(function(a) {
+        return a[1]
+    })
+}
