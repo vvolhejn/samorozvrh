@@ -102,6 +102,9 @@ h1 {
 .schedule_event:hover {
     overflow: visible;
     z-index: 100;
+    width: auto !important;
+    white-space:normal;
+    font-weight: bold;
 }
 
 .schedule_timestamp {
