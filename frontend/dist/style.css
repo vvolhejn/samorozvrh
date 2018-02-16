@@ -85,20 +85,23 @@ h1 {
 }
 
 .schedule_group {
+    /* Absolute elements inside .schedule_group are positioned relative to it */
     position: relative;
 }
 
 .schedule_event {
     position: absolute;
     top: 0;
+}
 
+.schedule_event_inner {
+    /* We use an inner div so that the padding respects the computed width */
     padding: 4px;
-    margin: 2px;
     background: white;
-
     white-space:nowrap;
     overflow: hidden;
 }
+
 .schedule_event:hover {
     overflow: visible;
     z-index: 100;

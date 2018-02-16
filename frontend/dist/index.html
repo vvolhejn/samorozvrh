@@ -75,7 +75,7 @@
     <table id="schedule_table">
         <tr>
             <td>&nbsp;</td>
-            <td>
+            <td class="schedule_group">
                 {{#each timestamps}}
                 <div class="schedule_timestamp" style="left:{{time_to_percent . }}">
                     {{.}}
@@ -94,8 +94,10 @@
                 <td class="schedule_group">
                     {{#each this}}
                         <div class="schedule_event" style="{{event_style}}">
-                        {{name}}<br>
-                        {{teacher}}
+                            <div class="schedule_event_inner">
+                            {{name}}<br>
+                            {{teacher}}
+                            </div>
                         </div>
                     {{/each}}
                 </td>
