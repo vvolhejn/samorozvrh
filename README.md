@@ -28,3 +28,7 @@ $GOPATH/bin/server
 
 Server je potřeba spouštět z kořene projektu, tj. `$GOPATH/src/github.com/iamwave/samorozvrh`, nebo zadat tuto cestu jako argument `-rootdir`.
 Cesty ke zdrojům, jako statické stránky a umístění solveru, jsou totiž relativní.
+
+## Dokumentace
+
+Podrobněji je fungování popsáno v [DOC.md](./DOC.md).

@@ -1,6 +1,13 @@
 # Samorozvrh solver
 Uses Google OR Tools to create a schedule according to the given parameters.
 
+For an example, run (from this directory):
+```
+./run.sh --debug fixtures/example.json
+```
+
+The solver should print an ASCII representation of a schedule, with two events in it.
+
 ## Input format
 See `fixtures/example.json` for an example.
 

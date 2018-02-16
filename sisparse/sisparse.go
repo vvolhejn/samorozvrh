@@ -26,6 +26,10 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	if err != nil {
 		return nil, err
 	}
+	// It is difficult to directly convert an event code to a schedule link,
+	// because SIS requires the faculty number. Therefore we first open the course
+	// in the "Subjects" SIS module and then go to a link which takes
+	// us to the schedule.
 	relativeScheduleUrl, err := getRelativeScheduleUrl(resp.Body)
 	if err != nil {
 		return nil, err
