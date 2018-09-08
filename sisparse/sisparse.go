@@ -89,6 +89,9 @@ func parseCourseEvents(body io.ReadCloser) [][]Event {
 	group := []Event{}
 	for _, row := range eventsTable {
 		event := parseEvent(row)
+		if (event == Event{}) {
+			continue
+		}
 		// A non-empty name means the start of a new group;
 		// names are omitted in all but the first event of a group.
 		if event.Name != "" {
@@ -122,6 +125,10 @@ func parseEvent(event *html.Node) Event {
 		Type:    cols[1],
 		Name:    cols[2],
 		Teacher: cols[3],
+	}
+
+	if (e.Teacher == "") {
+		return Event{}
 	}
 
 	addEventScheduling(&e, cols[4], cols[6])
