@@ -88,8 +88,8 @@ func parseCourseEvents(body io.ReadCloser) [][]Event {
 	res := [][]Event{}
 	group := []Event{}
 	for _, row := range eventsTable {
-		event := parseEvent(row)
-		if (event == Event{}) {
+		event, err := parseEvent(row)
+		if (err != nil) {
 			continue
 		}
 		// A non-empty name means the start of a new group;
@@ -112,7 +112,7 @@ func parseCourseEvents(body io.ReadCloser) [][]Event {
 	return res
 }
 
-func parseEvent(event *html.Node) Event {
+func parseEvent(event *html.Node) (Event, error) {
 	var cols []string
 	for col := event.FirstChild; col != nil; col = col.NextSibling {
 		// For some reason we also get siblings with no tag and no data?
@@ -127,16 +127,16 @@ func parseEvent(event *html.Node) Event {
 		Teacher: cols[3],
 	}
 
-	if (e.Teacher == "") {
-		return Event{}
-	}
-
-	addEventScheduling(&e, cols[4], cols[6])
-	return e
+	err := addEventScheduling(&e, cols[4], cols[6])
+	return e, err;
 }
 
-func addEventScheduling(e *Event, daytime string, dur string) {
+func addEventScheduling(e *Event, daytime string, dur string) error {
 	// For strings such as "Út 12:20"
+	if (len(daytime) == 0) {
+		return errors.New("The daytime field is empty")
+	}
+
 	daytimeRunes := []rune(daytime)
 	e.Day = parseDay(string(daytimeRunes[:2]))
 
@@ -150,6 +150,7 @@ func addEventScheduling(e *Event, daytime string, dur string) {
 	e.TimeFrom = timeFrom
 	e.TimeTo = timeFrom.Add(time.Minute * time.Duration(d))
 	e.WeekParity = parity
+	return nil
 }
 
 func parseDurationAndWeekParity(dur string) (int, int) {
