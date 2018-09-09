@@ -40,7 +40,7 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	return parseCourseEvents(resp.Body), nil
+	return parseCourseEvents(resp.Body)
 }
 
 func getRelativeScheduleUrl(body io.ReadCloser) (string, error) {
@@ -65,7 +65,7 @@ func getRelativeScheduleUrl(body io.ReadCloser) (string, error) {
 	return scrape.Attr(scheduleLink, "href"), nil
 }
 
-func parseCourseEvents(body io.ReadCloser) [][]Event {
+func parseCourseEvents(body io.ReadCloser) ([][]Event, error) {
 	root, err := html.Parse(body)
 	if err != nil {
 		panic(err)
@@ -82,7 +82,7 @@ func parseCourseEvents(body io.ReadCloser) [][]Event {
 	eventsTable := scrape.FindAll(root, matcher)
 	if len(eventsTable) == 0 {
 		// The event table is not present at all (possibly SIS returned an error message)
-		return [][]Event{}
+		return nil, errors.New("Couldn't find the event table")
 	}
 
 	res := [][]Event{}
@@ -109,7 +109,12 @@ func parseCourseEvents(body io.ReadCloser) [][]Event {
 	if len(group) > 0 {
 		res = append(res, group)
 	}
-	return res
+
+	if len(res) == 0 {
+		return nil, errors.New("The course has no scheduled events")
+	}
+
+	return res, nil
 }
 
 func parseEvent(event *html.Node) (Event, error) {
@@ -133,7 +138,7 @@ func parseEvent(event *html.Node) (Event, error) {
 
 func addEventScheduling(e *Event, daytime string, dur string) error {
 	// For strings such as "Út 12:20"
-	if (len(daytime) == 0) {
+	if len(daytime) == 0 {
 		return errors.New("The daytime field is empty")
 	}
 
