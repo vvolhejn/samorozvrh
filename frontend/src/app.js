@@ -24,7 +24,7 @@ export function clearAll() {
         selectedOptions = {}
         saveToCookies()
     }
-    view.renderCourseList();
+    view.renderCourseList(courses);
     return false
 }
 
