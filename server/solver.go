@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -27,6 +28,7 @@ func Solve(query []byte) ([]byte, error) {
 	subProcess.Dir = path.Join(rootDir, "solver")
 
 	res, err := subProcess.CombinedOutput()
+	fmt.Printf("%s\n%s\n", res, err)
 	if err != nil {
 		return nil, err
 	}
