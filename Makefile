@@ -12,3 +12,7 @@ build-server:
 
 build-frontend:
 	cd frontend && make -j
+
+clear-cache:
+	rm -rf cache/*
+	python3 generate_dummy_subjects.py
