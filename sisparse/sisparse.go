@@ -15,7 +15,7 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s"
+const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=2018&sem=1"
 
 // Returns a two-dimensional array containing groups of events.
 // Each group is a slice of events which must be enrolled together,
