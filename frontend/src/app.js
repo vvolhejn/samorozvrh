@@ -173,7 +173,7 @@ function getNonOverlappingGroups() {
 
 function loadFromCookies() {
     var loadedFromCookies = Cookies.getJSON("loadedCourseCodes")
-    if (loadFromCookies === undefined) {
+    if (loadedFromCookies === undefined) {
         return
     }
     loadedCourseCodes = loadedFromCookies
