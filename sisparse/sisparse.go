@@ -1,11 +1,13 @@
 package sisparse
 
 import (
+	"bufio"
 	"errors"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -15,14 +17,16 @@ import (
 	"golang.org/x/net/html/atom"
 )
 
-const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=2018&sem=1"
+const schoolYear = 2018
+const semester = 1
+const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 
 // Returns a two-dimensional array containing groups of events.
 // Each group is a slice of events which must be enrolled together,
 // the groups represent different times/teachers of the same course.
 // Also, lectures and seminars/practicals are in separate groups.
 func GetCourseEvents(courseCode string) ([][]Event, error) {
-	resp, err := http.Get(fmt.Sprintf(sisUrl, courseCode))
+	resp, err := http.Get(fmt.Sprintf(sisUrl, courseCode, schoolYear, semester))
 	if err != nil {
 		return nil, err
 	}
@@ -35,6 +39,11 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 		return nil, err
 	}
 	scheduleUrl := getAbsoluteUrl(sisUrl, relativeScheduleUrl)
+
+	// For some subjects (ASZLJ3010), the link has the wrong semester for whatever reason
+	// (even though the correct semester is specified in the original URL).
+	// Let's fix this manually.
+	scheduleUrl = strings.Replace(scheduleUrl, fmt.Sprintf("sem=%d", 3-semester), fmt.Sprintf("sem=%d", semester), -1)
 
 	resp, err = http.Get(scheduleUrl)
 	if err != nil {
@@ -71,6 +80,11 @@ func parseCourseEvents(body io.ReadCloser) ([][]Event, error) {
 		panic(err)
 	}
 
+	f, err := os.Create("/tmp/samorozvrh_debug.html")
+	w := bufio.NewWriter(f)
+	html.Render(w, root)
+	w.Flush()
+
 	matcher := func(n *html.Node) bool {
 		if n.DataAtom == atom.Tr && n.Parent != nil && n.Parent.Parent != nil {
 			return scrape.Attr(n.Parent.Parent, "id") == "table1" &&
@@ -89,7 +103,7 @@ func parseCourseEvents(body io.ReadCloser) ([][]Event, error) {
 	group := []Event{}
 	for _, row := range eventsTable {
 		event, err := parseEvent(row)
-		if (err != nil) {
+		if err != nil {
 			continue
 		}
 		// A non-empty name means the start of a new group;
@@ -133,7 +147,7 @@ func parseEvent(event *html.Node) (Event, error) {
 	}
 
 	err := addEventScheduling(&e, cols[4], cols[6])
-	return e, err;
+	return e, err
 }
 
 func addEventScheduling(e *Event, daytime string, dur string) error {

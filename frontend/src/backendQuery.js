@@ -33,7 +33,11 @@ export function addCourse (courseCode, callback) {
         if (response['error'] === 'The course has no scheduled events') {
           callback(null, 'Předmět ' + courseCode + ' není rozvržený.')
         } else {
-          callback(null, 'Nepodařilo se najít předmět ' + courseCode + '; je kód zadán správně?')
+          callback(
+            null,
+            'Nepodařilo se najít rozvrh předmětu ' + courseCode + '. ' +
+            'Zkontrolujte prosím, že je kód zadán správně, a že je předmět už rozvržený.'
+          )
         }
       } else {
         callback(response['data'], null)
