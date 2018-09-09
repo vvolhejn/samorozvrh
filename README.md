@@ -5,7 +5,7 @@ Automatická tvorba rozvhu pro studenty Univerzity Karlovy
 Instalace předpokládá, že je nainstalované Go.
 
 ```
-go get github.com/src/github.com/iamwave/samorozvrh/server
+go get github.com/iamwave/samorozvrh/server
 ```
 
 Tím se projekt `git clone`uje do `$GOPATH/src/github.com/iamwave/samorozvrh` a zkompiluje se Go kód.
@@ -14,7 +14,7 @@ Solver vyžaduje **Python 3**.
 Frontend vyžaduje **Webpack**, který zase vyžaduje **npm**. Webpack lze nainstalovat přes
 
 ```
-npm install webpack
+sudo npm install webpack webpack-cli --global
 ```
 
 Pak by k instalaci teoreticky mělo stačit spustit z kořenové složky projektu `make`.

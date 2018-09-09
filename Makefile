@@ -3,7 +3,7 @@ all: build-all
 build-all: build-solver build-server build-frontend
 
 build-solver:
-	cd solver && make -j
+	cd solver && sudo make -j
 
 build-server:
 	cd server && make -j
