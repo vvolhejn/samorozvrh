@@ -30,7 +30,7 @@ func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	re := regexp.MustCompile("^[0-9a-zA-z]*$")
+	re := regexp.MustCompile(`\w*$`)
 
 	if !re.MatchString(query) {
 		fmt.Fprintf(w, `{"error":"Query must contain only alphanumeric characters"}`)

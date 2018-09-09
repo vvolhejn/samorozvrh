@@ -7,6 +7,8 @@ build-solver:
 
 build-server:
 	cd server && make -j
+	mkdir -p cache
+	python3 generate_dummy_subjects.py
 
 build-frontend:
 	cd frontend && make -j

@@ -51,17 +51,25 @@ export function addCourse () {
 }
 
 function addGroup (group) {
-  if (group.length == 0) {
+  if (group.length === 0) {
     return
   }
   var type = group[0].type
   var name = group[0].name
   var id = type + ';' + name
 
+  var typeName = 'jiné'
+  switch (type) {
+    case 'P': typeName = 'přednáška'
+      break
+    case 'X': typeName = 'seminář'
+      break
+  }
+
   if (courses[id] === undefined) {
     courses[id] = {
       id: id,
-      name: name + ' (' + ((type === 'P') ? 'přednáška' : 'seminář') + ')',
+      name: name + ' (' + typeName + ')',
       options: [],
       allowed: true
     }
