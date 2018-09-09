@@ -30,7 +30,11 @@ export function addCourse (courseCode, callback) {
     } else {
       var response = JSON.parse(responseString)
       if (response['error']) {
-        callback(null, 'Nepodařilo se najít předmět ' + courseCode + '; je kód zadán správně?')
+        if (response['error'] === 'The course has no scheduled events') {
+          callback(null, 'Předmět ' + courseCode + ' není rozvržený.')
+        } else {
+          callback(null, 'Nepodařilo se najít předmět ' + courseCode + '; je kód zadán správně?')
+        }
       } else {
         callback(response['data'], null)
       }
