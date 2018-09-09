@@ -6,11 +6,8 @@ from ortools.constraint_solver import pywrapcp
 
 logger = logging.getLogger(__name__)
 
-TIME_LIMIT_MS = 1000
-SOLUTIONS_LIMIT = 5
 
-
-def solve(courses):
+def solve(courses, time_limit_ms):
     """
     Given a list of courses to enroll in (a course may have multiple alternative times),
     find a valid schedule.
@@ -49,13 +46,11 @@ def solve(courses):
                                  minimize_phase])
 
     # Stop the solver after a fixed time / number of found solutions
-    time_limit_ms = solver.TimeLimit(TIME_LIMIT_MS)
     # solutions_limit = solver.SolutionsLimit(SOLUTIONS_LIMIT)
-
     ok = solver.Solve(
         main_phase,
         [
-            time_limit_ms,
+            solver.TimeLimit(time_limit_ms),
             # solutions_limit,
             objective_monitor,
             collector,
@@ -86,7 +81,7 @@ def _solution_to_selection(collector, solution_index, flat_vars, flat_vars_inver
     for j in range(len(flat_vars)):
         if collector.PerformedValue(solution_index, flat_vars[j]):
             course_index, opt_index = flat_vars_inverse[j]
-            if (selection[course_index] != None) and (selection[course_index] != opt_index):
+            if (selection[course_index] is not None) and (selection[course_index] != opt_index):
                 raise RuntimeError("Multiple options were chosen for "
                                    "course {} ".format(course_index))
 

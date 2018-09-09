@@ -2,6 +2,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -9,9 +10,9 @@ import (
 	"strings"
 )
 
-const SOLVER_COMMAND = "python3 -m pipenv run python solver/main.py"
+const SOLVER_COMMAND = "python3 -m pipenv run python solver/main.py --time-limit %d"
 
-func Solve(query []byte) ([]byte, error) {
+func Solve(query []byte, timeLimit int) ([]byte, error) {
 	// Create a temporary file with the query, feed it to the solver
 	// and run it
 
@@ -21,7 +22,7 @@ func Solve(query []byte) ([]byte, error) {
 	}
 	defer os.Remove(tempfile.Name()) // clean up
 
-	commandParts := strings.Split(SOLVER_COMMAND+" "+tempfile.Name(), " ")
+	commandParts := strings.Split(fmt.Sprintf(SOLVER_COMMAND, timeLimit)+" "+tempfile.Name(), " ")
 	subProcess := exec.Command(commandParts[0], commandParts[1:]...)
 	// Run relative to the directory given by -rootdir
 	subProcess.Dir = path.Join(rootDir, "solver")

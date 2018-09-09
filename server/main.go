@@ -18,6 +18,7 @@ import (
 )
 
 const FRONTEND_DIR = "frontend/dist"
+const TIME_PER_QUERY = 3000
 
 var rootDir string
 
@@ -83,7 +84,7 @@ func solverQueryHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Printf("Solverquery: %s\n", ellipsis(string(body), 30))
-	res, err := Solve(body)
+	res, err := Solve(body, TIME_PER_QUERY)
 	if err != nil {
 		log.Printf("Solverquery error: %s", err)
 		fmt.Fprintf(w, `{"error":"%s"}`, err)
