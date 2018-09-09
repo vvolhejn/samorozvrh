@@ -32,3 +32,7 @@ Cesty ke zdrojům, jako statické stránky a umístění solveru, jsou totiž re
 ## Dokumentace
 
 Podrobněji je fungování popsáno v [DOC.md](./DOC.md).
+
+## Poděkování
+
+Děkuji [Richardu Hladíkovi](https://github.com/RichardHladik) za jeho příspěvky k opravování a vylepšování projektu.
