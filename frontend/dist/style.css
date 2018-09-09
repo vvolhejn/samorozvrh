@@ -3,7 +3,7 @@ body {
 }
 
 #left {
-    position: fixed;
+    position: absolute;
     width: 49%;
     height: 100%;
     margin-right: 30px;
@@ -17,7 +17,8 @@ h1 {
     width: 49%;
     height: auto;
     position: absolute;
-    right: 0;
+    /*right: 0;*/
+    left: 50%;
     padding-left: 30px;
 }
 
