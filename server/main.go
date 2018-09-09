@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"path"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -22,14 +23,25 @@ var rootDir string
 
 func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Path[len("/sisquery/"):]
-	if strings.Contains(query, "/") {
-		fmt.Fprintf(w, `{"error":"Query should not contain slashes"}`)
+	query = strings.Trim(query, " ")
+
+	if len(query) > 32 {
+		fmt.Fprintf(w, `{"error":"The query is too long"}`)
+		return
+	}
+
+	re := regexp.MustCompile("^[0-9a-zA-z]*$")
+
+	if !re.MatchString(query) {
+		fmt.Fprintf(w, `{"error":"Query must contain only alphanumeric characters"}`)
 		return
 	}
 	var res string
 	var err error
 
+	query = strings.ToUpper(query)
 	log.Printf("Sisquery: %s", ellipsis(query, 10))
+
 	if isCached(query) {
 		log.Println("  (using cache)")
 		res, err = getCache(query)
