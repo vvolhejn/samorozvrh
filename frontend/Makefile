@@ -1,4 +1,5 @@
 all: install-frontend
 
 install-frontend:
-	webpack
+	npm install
+	npm run prod

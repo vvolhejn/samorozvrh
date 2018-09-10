@@ -1,119 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Samorozvrh</title>
-    <link rel="stylesheet" href="style.css"></link>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Samorozvrh</title>
+  <link rel="stylesheet" href="style.css"></link>
 </head>
 <body>
 
-<div id="left">
-    <h1>Samorozvrh</h1>
-    <form>
-        <a href="about.html"><em>O co jde?</em></a><br>
-        Kód předmětu nebo <a href="about.html"><em>speciální kód</em></a>:<br>
-        <input type="text" name="course_code" id="course_code" value="NTIN061" autofocus="autofocus" onfocus="this.select()">
-        <input type="submit" value="Přidat" onclick="return Samorozvrh.addCourse()">
-    </form>
-    <form>
-        <input type="button" value="Sestavit rozvrh" onclick="return Samorozvrh.createSchedule()">
-    </form>
-    <form>
-        <input type="button" value="Smazat vše" onclick="return Samorozvrh.clearAll()">
-    </form>
-    <div id="status"></div>
-    <hr>
-    <div id="schedule">
-    </div>
-</div>
+  <div id="app"></div>
 
-<div id="right">
-    <div id="courses">
-        <table id="course_table">
-            <thead></thead>
-            <tbody id="course_table_body">
-            </tbody>
-        </table>
-    </div>
-</div>
+  <script type="text/javascript" src="app.js"></script>
 
 </body>
-
-<script id="course_list_template" type="text/x-handlebars-template">
-    {{#each this}}
-        <tr class="course_header">
-            <td>
-                <input id="cb{{@index}}" type="checkbox" {{#if (course_allowed)}}checked{{/if}}
-                    onclick="return Samorozvrh.handleCheckbox('cb{{@index}}', '{{id}}')">
-            </td>
-            <td colspan="2"><label for="cb{{@index}}">{{name}}</td>
-        </tr>
-        <tr>
-            <td colspan="2" class="pr_cell">
-                Priorita:
-                <input class="pr_radio" type="radio" value="1" name="radiogroup{{@index}}" id="radio1{{@index}}"
-                    onclick="return Samorozvrh.handlePriorityChange('{{id}}', 1)">
-                <label for="radio1{{@index}}" class="pr_label1"></label>
-                <input class="pr_radio" type="radio" value="2" name="radiogroup{{@index}}" id="radio2{{@index}}"
-                    onclick="return Samorozvrh.handlePriorityChange('{{id}}', 2)"><label for="radio2{{@index}}" class="pr_label2"></label>
-                <input class="pr_radio" type="radio" value="3" name="radiogroup{{@index}}" id="radio3{{@index}}"
-                    onclick="return Samorozvrh.handlePriorityChange('{{id}}', 3)"><label for="radio3{{@index}}" class="pr_label3"></label>
-            </td>
-        </tr>
-        {{#each options}}
-            <tr class="{{highlight_selection ../id}}">
-                <td>
-                    <input id="cb{{> group_id}}" type="checkbox" {{#if allowed}}checked{{/if}}
-                        onclick="return Samorozvrh.handleCheckbox('cb{{> group_id}}', '{{../id}}', {{@index}})">
-                </td>
-                <td><label for="cb{{> group_id}}">{{[0].teacher}}</label></td>
-                <td><label for="cb{{> group_id}}">{{all_times}}</label></td>
-            </tr>
-        {{/each}}
-    {{/each}}
-</script>
-
-<script id="schedule_template" type="text/x-handlebars-template">
-    <table id="schedule_table">
-        <tr>
-            <td>&nbsp;</td>
-            <td class="schedule_group">
-                {{#each timestamps}}
-                <div class="schedule_timestamp" style="left:{{time_to_percent . }}">
-                    {{.}}
-                </div>
-                {{/each}}
-            </td>
-        </tr>
-        {{#each groupsByDay}}
-        {{#if groups}}
-            {{#each groups}}
-            <tr>
-                <td>
-                    {{#if index}}{{else}}{{../day}}{{/if}}
-                    <br>&nbsp;
-                </td>
-                <td class="schedule_group">
-                    {{#each this}}
-                        <div class="schedule_event" style="{{event_style}}">
-                            <div class="schedule_event_inner">
-                            {{name}}<br>
-                            {{teacher}}
-                            </div>
-                        </div>
-                    {{/each}}
-                </td>
-            </tr>
-            {{/each}}
-        {{else}}
-            <tr>
-                <td>{{day}}<br>&nbsp;</td>
-            </tr>
-        {{/if}}
-        {{/each}}
-    </table>
-</script>
-
-<!--<script type="text/javascript" src="lib/handlebars-v4.0.11.js"></script>-->
-<script type="text/javascript" src="app.js"></script>
 </html>
