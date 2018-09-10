@@ -1,4 +1,4 @@
-# Frontend of the Samorozvrh
+# Frontend
 
 ## Webpack
 
