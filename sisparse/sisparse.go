@@ -87,7 +87,8 @@ func parseCourseEvents(body io.ReadCloser) ([][]Event, error) {
 
 	matcher := func(n *html.Node) bool {
 		if n.DataAtom == atom.Tr && n.Parent != nil && n.Parent.Parent != nil {
-			return scrape.Attr(n.Parent.Parent, "id") == "table1" &&
+			return (scrape.Attr(n.Parent.Parent, "id") == "table1" ||
+				scrape.Attr(n.Parent.Parent, "id") == "roz_predmet_macro1") &&
 				scrape.Attr(n, "class") != "head1" // ignore table header
 		}
 		return false
