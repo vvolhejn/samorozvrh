@@ -38,7 +38,11 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	if err != nil {
 		return nil, err
 	}
-	scheduleUrl := getAbsoluteUrl(sisUrl, relativeScheduleUrl)
+
+	scheduleUrl, err := getAbsoluteUrl(sisUrl, relativeScheduleUrl)
+	if err != nil {
+		return nil, err
+	}
 
 	// For some subjects (ASZLJ3010), the link has the wrong semester for whatever reason
 	// (even though the correct semester is specified in the original URL).
@@ -57,7 +61,7 @@ func getRelativeScheduleUrl(body io.ReadCloser) (string, error) {
 
 	root, err := html.Parse(body)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 
 	matcher := func(n *html.Node) bool {
@@ -77,7 +81,7 @@ func getRelativeScheduleUrl(body io.ReadCloser) (string, error) {
 func parseCourseEvents(body io.ReadCloser) ([][]Event, error) {
 	root, err := html.Parse(body)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	f, err := os.Create("/tmp/samorozvrh_debug.html")
@@ -158,14 +162,21 @@ func addEventScheduling(e *Event, daytime string, dur string) error {
 	}
 
 	daytimeRunes := []rune(daytime)
-	e.Day = parseDay(string(daytimeRunes[:2]))
+	var err error
+	e.Day, err = parseDay(string(daytimeRunes[:2]))
+	if err != nil {
+		return err
+	}
 
 	timeFrom, err := time.Parse("15:04", string(daytimeRunes[3:]))
 	if err != nil {
-		panic(fmt.Sprintf("Unable to parse time: %s", string(daytimeRunes[3:])))
+		return err
 	}
 
-	d, parity := parseDurationAndWeekParity(dur)
+	d, parity, err := parseDurationAndWeekParity(dur)
+	if err != nil {
+		return err
+	}
 
 	e.TimeFrom = timeFrom
 	e.TimeTo = timeFrom.Add(time.Minute * time.Duration(d))
@@ -173,12 +184,12 @@ func addEventScheduling(e *Event, daytime string, dur string) error {
 	return nil
 }
 
-func parseDurationAndWeekParity(dur string) (int, int) {
+func parseDurationAndWeekParity(dur string) (int, int, error) {
 	// Strings like "90" or "240 Sudé týdny (liché kalendářní)"
 	w := strings.Fields(dur)
 	d, err := strconv.Atoi(w[0])
 	if err != nil {
-		panic(fmt.Sprintf("Unable to parse duration: %s", err))
+		return -1, -1, errors.New(fmt.Sprintf("Unable to parse duration: %s", err))
 	}
 	parity := 0
 	if len(w) > 1 {
@@ -188,27 +199,27 @@ func parseDurationAndWeekParity(dur string) (int, int) {
 			parity = 2
 		}
 	}
-	return d, parity
+	return d, parity, nil
 }
 
-func parseDay(day string) int {
+func parseDay(day string) (int, error) {
 	days := []string{"Po", "Út", "St", "Čt", "Pá"}
 	for i, d := range days {
 		if d == day {
-			return i
+			return i, nil
 		}
 	}
-	panic(fmt.Sprintf("Unknown day \"%s\"", day))
+	return -1, errors.New(fmt.Sprintf("Unknown day \"%s\"", day))
 }
 
-func getAbsoluteUrl(base, relative string) string {
+func getAbsoluteUrl(base, relative string) (string, error) {
 	baseUrl, err := url.Parse(base)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	relativeUrl, err := url.Parse(relative)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
-	return baseUrl.ResolveReference(relativeUrl).String()
+	return baseUrl.ResolveReference(relativeUrl).String(), nil
 }
