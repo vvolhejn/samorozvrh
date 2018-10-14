@@ -103,22 +103,22 @@ export default {
      */
     addCourse (courseCode) {
       if (this.loadedCourseCodes[courseCode]) {
-        this.setStatusMessage('Předmět ' + courseCode + ' už je přidán')
+        this.setStatusMessage(`Předmět ${courseCode} už je přidán`)
         return
       }
 
-      this.setStatusMessage('Hledám předmět ' + courseCode)
+      this.setStatusMessage(`Hledám předmět ${courseCode}`)
       
       backendQuery.addCourse(courseCode, (res, err) => {
         if (err) {
-          this.setStatusMessage('Chyba: ' + err)
+          this.setStatusMessage(`Chyba: ${err}`)
           return
         }
 
         res.forEach(group => this.addGroup(group))
         this.loadedCourseCodes[courseCode] = true
         this.storeAppState()
-        this.setStatusMessage('Přidán předmět ' + courseCode)
+        this.setStatusMessage(`Přidán předmět ${courseCode}`)
       })
     },
 
@@ -154,12 +154,12 @@ export default {
 
       backendQuery.createSchedule(query, (res, err) => {
         if (err) {
-          this.setStatusMessage('Chyba: ' + err)
+          this.setStatusMessage(`Chyba: ${err}`)
           return
         }
         
         var nSelected = res.filter(x => x !== null).length
-        this.setStatusMessage('Rozvrh sestaven (počet předmětů: ' + nSelected + ')')
+        this.setStatusMessage(`Rozvrh sestaven (počet předmětů: ${nSelected})`)
         
         // create the schedule
         this.schedule = []
