@@ -7,11 +7,19 @@ import Group from './Group.js'
  * Has many groups. A student can enroll to only a single group.
  */
 export default class Course {
-  constructor (type, name) {
+  constructor (code, type, name) {
     /**
-     * Course id used for list rendering and other id stuff
+     * Course id used for list rendering and other id stuff.
+     * It is a unique identifier of the course.
      */
-    this.id = type + ';' + name
+    this.id = type + ';' + code
+
+    /**
+     * Identifier of the course, eg. NTIN061
+     * Not completely unique! Unique is the code, paired with type.
+     * @type {string}
+     */
+    this.code = code
 
     /**
      * Type of the course (lecture/practicals)
@@ -86,6 +94,7 @@ export default class Course {
 
   toJson () {
     return {
+      code: this.code,
       type: this.type,
       name: this.name,
       groups: this.groups.map(g => g.toJson()),
@@ -95,7 +104,7 @@ export default class Course {
   }
 
   static fromJson (json) {
-    let course = new Course(json.type, json.name)
+    let course = new Course(json.code, json.type, json.name)
     course.groups = json.groups.map(g => Group.fromJson(course, g))
     course.allowed = json.allowed
     course.priority = json.priority
