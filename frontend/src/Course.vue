@@ -48,8 +48,8 @@ export default {
   methods: {
 
     groupClass (group) {
-      for (let i = 0; i < this.schedule.length; i++) {
-        if (this.schedule[i].group === group) {
+      for (const term of this.schedule) {
+        if (term.group === group) {
           return 'selected_course'
         }
       }

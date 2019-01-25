@@ -28,8 +28,8 @@ export default {
   props: ['group', 'schedule'],
   computed: {
     groupClass () {
-      for (let i = 0; i < this.schedule.length; i++) {
-        if (this.schedule[i].group === this.group) {
+      for (const term of this.schedule) {
+        if (term.group === this.group) {
           return 'selected_course'
         }
       }

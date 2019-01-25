@@ -57,7 +57,7 @@ export default {
   },
   methods: {
     radioId(priority) {
-      return 'radio' + priority + '' + this.index
+      return `radio-${priority}-${this.index}`
     }
   }
 }

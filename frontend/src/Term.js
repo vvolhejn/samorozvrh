@@ -10,7 +10,8 @@ export default class Term {
     this.group = group
 
     /**
-     * Name of the teacher
+     * Teacher name
+     * @type {string}
      */
     this.teacher = teacher
 
@@ -22,7 +23,8 @@ export default class Term {
     this.timeTo = timeTo
 
     /**
-     * Parity of the week
+     * 1 == odd weeks
+     * 2 == even weeks
      */
     this.weekParity = weekParity
   }
@@ -71,9 +73,6 @@ export default class Term {
     }
   }
 
-  /**
-   * Serializes object to JSON
-   */
   toJson () {
     return {
       teacher: this.teacher,
@@ -84,9 +83,6 @@ export default class Term {
     }
   }
 
-  /**
-   * Creates the object from it's JSON representation
-   */
   static fromJson (group, json) {
     return new Term(
       group,

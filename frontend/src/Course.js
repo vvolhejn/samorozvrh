@@ -19,7 +19,7 @@ export default class Course {
     this.type = type
 
     /**
-     * Name of the course (human-readable, in czech)
+     * Name of the course (human-readable, in Czech)
      */
     this.name = name
 
@@ -34,7 +34,7 @@ export default class Course {
     this.allowed = true
 
     /**
-     * Priority of this course
+     * Course priority with possible values: {1, 2, 3}
      */
     this.priority = 2
   }
@@ -56,7 +56,6 @@ export default class Course {
   static createScheduleQuery(courses) {
     const REWARDS = [1, 100, 10000]
 
-    // the query sent to the server
     let query = []
     
     // maps sent data to application data
@@ -85,9 +84,6 @@ export default class Course {
     return [query, queryMap]
   }
 
-  /**
-   * Serializes object to JSON
-   */
   toJson () {
     return {
       type: this.type,
@@ -98,9 +94,6 @@ export default class Course {
     }
   }
 
-  /**
-   * Creates the object from it's JSON representation
-   */
   static fromJson (json) {
     let course = new Course(json.type, json.name)
     course.groups = json.groups.map(g => Group.fromJson(course, g))

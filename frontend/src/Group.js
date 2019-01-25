@@ -37,9 +37,6 @@ export default class Group {
     return this.terms.map(term => term.serializeForQuery())
   }
 
-  /**
-   * Serializes object to JSON
-   */
   toJson () {
     return {
       terms: this.terms.map(t => t.toJson()),
@@ -47,9 +44,6 @@ export default class Group {
     }
   }
 
-  /**
-   * Creates the object from it's JSON representation
-   */
   static fromJson (course, json) {
     let group = new Group(course)
     group.terms = json.terms.map(t => Term.fromJson(group, t))
