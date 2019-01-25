@@ -78,7 +78,7 @@ export default {
     /**
      * Already loaded course codes to prevent double-loading
      */
-    loadedCourseCodes: {},
+    loadedCourseCodes: new Set(),
 
     /**
      * List of terms of groups in the schedule
@@ -102,7 +102,7 @@ export default {
      * Adds course with the given code to the user selection
      */
     addCourse (courseCode) {
-      if (this.loadedCourseCodes[courseCode]) {
+      if (this.loadedCourseCodes.has(courseCode)) {
         this.setStatusMessage(`Předmět ${courseCode} už je přidán`)
         return
       }
@@ -118,7 +118,7 @@ export default {
         for (let i = 0; i < res.length; i++)
           this.addGroup(courseCode, res[i], i)
 
-        this.loadedCourseCodes[courseCode] = true
+        this.loadedCourseCodes.add(courseCode)
         this.storeAppState()
         this.setStatusMessage(`Přidán předmět ${courseCode}`)
       })
@@ -185,7 +185,7 @@ export default {
       }
 
       this.courses = []
-      this.loadedCourseCodes = {}
+      this.loadedCourseCodes = new Set()
       this.schedule = []
       this.storeAppState()
       this.setStatusMessage('')
@@ -212,7 +212,7 @@ export default {
 
       let state = {
         courses: this.courses.map(c => c.toJson()),
-        loadedCourseCodes: this.loadedCourseCodes
+        loadedCourseCodes: [...this.loadedCourseCodes]
       }
 
       window.localStorage[STORAGE_KEY] = JSON.stringify(state)
@@ -236,7 +236,7 @@ export default {
       }
 
       this.courses = state.courses.map(c => Course.fromJson(c))
-      this.loadedCourseCodes = state.loadedCourseCodes
+      this.loadedCourseCodes = new Set(state.loadedCourseCodes)
     }
 
   },
