@@ -35,9 +35,6 @@ export default {
       },
       set (value) {
         this.course.allowed = value
-        for (let i = 0; i < this.course.groups.length; i++) {
-          this.course.groups[i].allowed = value
-        }
         this.$emit('allowedItemsChanged')
       }
     },

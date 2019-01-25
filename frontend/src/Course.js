@@ -37,14 +37,24 @@ export default class Course {
     this.groups = []
 
     /**
-     * Is this course allowed to be considered during schedule creation?
-     */
-    this.allowed = true
-
-    /**
      * Course priority with possible values: {1, 2, 3}
      */
     this.priority = 2
+  }
+
+  /**
+   * Is this course allowed to be considered during schedule creation?
+   */
+  get allowed() {
+    for (const group of this.groups)
+      if (group.allowed)
+        return true
+    return false
+  }
+
+  set allowed(value) {
+    for (const group of this.groups)
+      group.allowed = value
   }
 
   /**

@@ -37,14 +37,10 @@ export default {
     },
     'allowed': {
       get () {
-        if (!this.group.course.allowed)
-          return false
         return this.group.allowed
       },
       set (value) {
         this.group.allowed = value
-        if (value)
-          this.group.course.allowed = true
         this.$emit('allowedItemsChanged')
       }
     }
