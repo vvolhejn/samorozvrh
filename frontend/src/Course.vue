@@ -13,6 +13,7 @@
   <priority-buttons :course="course" />
   <group
     v-for="group in course.groups"
+    :key="group.id"
     :group="group"
     :schedule="schedule"
     @allowedItemsChanged="$emit('allowedItemsChanged')"

@@ -4,7 +4,21 @@ import Term from './Term.js'
  * Represents a group (parallel) a student can enroll into (czech: ~paralelka)
  */
 export default class Group {
-  constructor (course) {
+  constructor (course, index) {
+    /**
+     * Index of the group, as it has been sent by the server
+     * Used to identify the group
+     * Has no meaning outside frontend
+     * @type {int}
+     */
+    this.index = index
+
+    /**
+     * Unique id of the group used for rendering purpouses
+     * @type {string}
+     */
+    this.id = course.id + ';' + index
+
     /**
      * Course this group belongs to
      */
@@ -24,8 +38,8 @@ export default class Group {
   /**
    * Creates a Group instance from data sent by the server
    */
-  static fromData (course, data) {
-    let group = new Group(course)
+  static fromData (course, index, data) {
+    let group = new Group(course, index)
     data.forEach(d => group.terms.push(Term.fromData(group, d)))
     return group
   }
@@ -39,13 +53,14 @@ export default class Group {
 
   toJson () {
     return {
+      index: this.index,
       terms: this.terms.map(t => t.toJson()),
       allowed: this.allowed
     }
   }
 
   static fromJson (course, json) {
-    let group = new Group(course)
+    let group = new Group(course, json.index)
     group.terms = json.terms.map(t => Term.fromJson(group, t))
     group.allowed = json.allowed
     return group

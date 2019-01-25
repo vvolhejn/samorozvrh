@@ -115,7 +115,9 @@ export default {
           return
         }
 
-        res.forEach(group => this.addGroup(courseCode, group))
+        for (let i = 0; i < res.length; i++)
+          this.addGroup(courseCode, res[i], i)
+
         this.loadedCourseCodes[courseCode] = true
         this.storeAppState()
         this.setStatusMessage(`Přidán předmět ${courseCode}`)
@@ -126,7 +128,7 @@ export default {
      * Adds a group to the list of courses
      * (course is found or created automatically)
      */
-    addGroup (courseCode, groupData) {
+    addGroup (courseCode, groupData, index) {
       // get the course
       let type = groupData[0].type
       let course = this.courses.find(
@@ -140,7 +142,7 @@ export default {
       }
 
       // add the group
-      course.groups.push(Group.fromData(course, groupData))
+      course.groups.push(Group.fromData(course, index, groupData))
     },
 
     /**
