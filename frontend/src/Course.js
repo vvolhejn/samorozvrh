@@ -108,7 +108,6 @@ export default class Course {
       type: this.type,
       name: this.name,
       groups: this.groups.map(g => g.toJson()),
-      allowed: this.allowed,
       priority: this.priority
     }
   }
@@ -116,7 +115,6 @@ export default class Course {
   static fromJson (json) {
     let course = new Course(json.code, json.type, json.name)
     course.groups = json.groups.map(g => Group.fromJson(course, g))
-    course.allowed = json.allowed
     course.priority = json.priority
     return course
   }
