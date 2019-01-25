@@ -68,40 +68,6 @@ export default class Course {
     }
   }
 
-  /**
-   * Creates the server query for creating the schedule
-   */
-  static createScheduleQuery(courses) {
-    const REWARDS = [1, 100, 10000]
-
-    let query = []
-    
-    // maps sent data to application data
-    let queryMap = []
-
-    // courses actually sent to the server
-    let sentCourses = courses.filter(c => c.allowed && c.groups.some(g => g.allowed))
-
-    for (let i = 0; i < sentCourses.length; i++) {
-      let course = sentCourses[i]
-      let sentGroups = course.groups.filter(g => g.allowed)
-
-      query.push({
-        id: course.type + ";" + course.name, // TODO: does the server need this argument?
-        name: course.name,
-        reward: REWARDS[(course.priority || 2) - 1],
-        options: sentGroups.map(g => g.serializeForQuery())
-      })
-
-      queryMap.push({
-        course: course,
-        sentGroups: sentGroups
-      })
-    }
-
-    return [query, queryMap]
-  }
-
   toJson () {
     return {
       code: this.code,

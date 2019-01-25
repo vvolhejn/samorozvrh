@@ -57,10 +57,7 @@ export default class Term {
     return s
   }
 
-  /**
-   * Serializes the term for create schedule query
-   */
-  serializeForQuery () {
+  serializeForBackendQuery () {
     return {
       name: this.group.course.name,
       type: this.group.course.type,

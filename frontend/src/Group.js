@@ -44,11 +44,8 @@ export default class Group {
     return group
   }
 
-  /**
-   * Serializes the group for create schedule query
-   */
-  serializeForQuery () {
-    return this.terms.map(term => term.serializeForQuery())
+  serializeForBackendQuery () {
+    return this.terms.map(term => term.serializeForBackendQuery())
   }
 
   toJson () {

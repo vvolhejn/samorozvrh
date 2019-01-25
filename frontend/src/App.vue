@@ -151,7 +151,7 @@ export default {
     createSchedule () {
       this.setStatusMessage('Sestavuji rozvrh')
 
-      let [query, queryMap] = Course.createScheduleQuery(this.courses)
+      let [query, queryMap] = backendQuery.createScheduleQuery(this.courses)
 
       backendQuery.createSchedule(query, (res, err) => {
         if (err) {
