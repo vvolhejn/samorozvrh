@@ -2,9 +2,9 @@ import json
 import logging
 import argparse
 
-import course
-from output import schedule_to_string
-import solver
+from samorozvrh_solver import course
+from samorozvrh_solver.output import schedule_to_string
+from samorozvrh_solver import solver
 
 
 def main():

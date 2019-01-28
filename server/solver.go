@@ -10,7 +10,7 @@ import (
 	"strings"
 )
 
-const SOLVER_COMMAND = "python3 -m pipenv run python solver/main.py --time-limit %d"
+const SOLVER_COMMAND = "../env/bin/samorozvrh_solver --time-limit %d"
 
 func Solve(query []byte, timeLimit int) ([]byte, error) {
 	// Create a temporary file with the query, feed it to the solver
