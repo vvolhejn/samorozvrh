@@ -13,6 +13,7 @@
         id="course_code"
         onfocus="this.select()"
         v-model="courseCodeFieldValue"
+        @keyup.enter="addCourse(courseCodeFieldValue)"
       >
       <button @click="addCourse(courseCodeFieldValue)">
         Přidat
