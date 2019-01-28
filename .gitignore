@@ -2,3 +2,6 @@
 
 # Directory created by server for caching loaded courses
 cache/
+
+# Virtualenv
+env/

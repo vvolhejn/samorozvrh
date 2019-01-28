@@ -3,5 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+*.egg-info/
+
 # mypy
 .mypy_cache/

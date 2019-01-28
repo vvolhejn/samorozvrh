@@ -2,7 +2,7 @@
 Terms such as course, option, event, reward are explained in README.md
 """
 import calendar
-from datetime import time, date, datetime, timedelta
+from datetime import datetime
 
 DEFAULT_COURSE_REWARD = 1
 
