@@ -11,14 +11,10 @@ go get github.com/iamwave/samorozvrh/server
 Tím se projekt `git clone`uje do `$GOPATH/src/github.com/iamwave/samorozvrh` a zkompiluje se Go kód.
 
 Solver vyžaduje **Python 3**.
-Frontend vyžaduje **Webpack**, který zase vyžaduje **npm**. Webpack lze nainstalovat přes
+Frontend vyžaduje **Webpack**, který zase vyžaduje **npm**.
 
-```
-sudo npm install webpack webpack-cli --global
-```
-
-Pak by k instalaci teoreticky mělo stačit spustit z kořenové složky projektu `make`.
-To nainstaluje solver, (Pipenv a Google OR Tools), server (kompilace Go kódu) i frontend (webpackování JS do jednoho souboru).
+K instalaci by teoreticky mělo stačit spustit z kořenové složky projektu `make`.
+To nainstaluje solver, (Pipenv a Google OR Tools), server (kompilace Go kódu) i frontend (npm a webpackování JS do jednoho souboru).
 
 ## Spouštění
 
