@@ -6,7 +6,7 @@ build-solver:
 	cd solver && sudo make -j
 
 build-server:
-	cd server && make -j
+	cd backend/server && make -j
 	mkdir -p cache
 	python3 generate_dummy_subjects.py
 

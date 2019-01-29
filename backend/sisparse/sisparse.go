@@ -15,18 +15,24 @@ import (
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
+	// "github.com/iamwave/samorozvrh/cache"
 )
 
+// The year in which semester 1 begins
 const schoolYear = 2018
+
+// 1 for winter, 2 for summer
 const semester = 1
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
+const scheduleBaseUrl = "https://is.cuni.cz/studium/rozvrhng/"
 
 // Returns a two-dimensional array containing groups of events.
 // Each group is a slice of events which must be enrolled together,
 // the groups represent different times/teachers of the same course.
 // Also, lectures and seminars/practicals are in separate groups.
 func GetCourseEvents(courseCode string) ([][]Event, error) {
-	resp, err := http.Get(fmt.Sprintf(sisUrl, courseCode, schoolYear, semester))
+	subjectUrl := fmt.Sprintf(sisUrl, courseCode, schoolYear, semester)
+	resp, err := http.Get(subjectUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -141,9 +147,21 @@ func parseEvent(event *html.Node) (Event, error) {
 	for col := event.FirstChild; col != nil; col = col.NextSibling {
 		// For some reason we also get siblings with no tag and no data?
 		if len(strings.TrimSpace(col.Data)) > 0 {
-			cols = append(cols, scrape.Text(col))
+			if col.DataAtom == atom.A {
+				cols = append(cols, scrape.Attr(col, "href"))
+			} else {
+				cols = append(cols, scrape.Text(col))
+			}
 		}
 	}
+
+	relativeEventUrl := scrape.Attr(event.FirstChild.NextSibling.FirstChild, "href")
+	eventUrl, err := getAbsoluteUrl(scheduleBaseUrl, relativeEventUrl)
+	if err != nil {
+		return Event{}, err
+	}
+
+	// fmt.Println(eventUrl)
 
 	e := Event{
 		Type:     cols[1],
@@ -153,8 +171,16 @@ func parseEvent(event *html.Node) (Event, error) {
 		Language: cols[7],
 	}
 
-	err := addEventScheduling(&e, cols[4], cols[6])
+	addEventBuilding(&e, eventUrl)
+
+	err = addEventScheduling(&e, cols[4], cols[6])
 	return e, err
+}
+
+func addEventBuilding(e *Event, eventUrl string) {
+	fmt.Println(eventUrl)
+	// cacheName = fmt.Sprintf("rooms/%s", e.Room)
+	// if isCached
 }
 
 func addEventScheduling(e *Event, daytime string, dur string) error {

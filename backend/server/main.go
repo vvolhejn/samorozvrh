@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/iamwave/samorozvrh/sisparse"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -15,6 +14,9 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+
+	// "github.com/iamwave/samorozvrh/cache"
+	"github.com/iamwave/samorozvrh/backend/sisparse"
 )
 
 const FRONTEND_DIR = "frontend/dist"
