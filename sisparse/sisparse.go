@@ -18,7 +18,7 @@ import (
 )
 
 const schoolYear = 2018
-const semester = 2
+const semester = 1
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 
 // Returns a two-dimensional array containing groups of events.
@@ -146,9 +146,11 @@ func parseEvent(event *html.Node) (Event, error) {
 	}
 
 	e := Event{
-		Type:    cols[1],
-		Name:    cols[2],
-		Teacher: cols[3],
+		Type:     cols[1],
+		Name:     cols[2],
+		Teacher:  cols[3],
+		Room:     cols[5],
+		Language: cols[7],
 	}
 
 	err := addEventScheduling(&e, cols[4], cols[6])
