@@ -8,7 +8,7 @@ earliest_break = datetime.datetime(2000, 1, 1, 10, 0)
 
 
 def save_subject(name, data):
-    with open("cache/{}".format(name), "w") as f:
+    with open("cache/courses/{}".format(name), "w") as f:
         json.dump({"data": data}, f)
 
 

@@ -42,10 +42,11 @@ func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 
 	query = strings.ToUpper(query)
 	log.Printf("Sisquery: %s", ellipsis(query, 10))
+	cacheName := []string{"courses", query}
 
-	if isCached(query) {
+	if isCached(cacheName) {
 		log.Println("  (using cache)")
-		res, err = getCache(query)
+		res, err = getCache(cacheName)
 	} else {
 		log.Println("  (querying)")
 		var events [][]sisparse.Event
@@ -55,7 +56,7 @@ func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 			s, err = json.Marshal(events)
 			if err == nil {
 				res = fmt.Sprintf(`{"data":%s}`, string(s))
-				err = setCache(query, res)
+				err = setCache(cacheName, res)
 			}
 		}
 	}
