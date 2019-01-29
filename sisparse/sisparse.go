@@ -18,7 +18,7 @@ import (
 )
 
 const schoolYear = 2018
-const semester = 1
+const semester = 2
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 
 // Returns a two-dimensional array containing groups of events.
