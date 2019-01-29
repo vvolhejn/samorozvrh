@@ -15,7 +15,8 @@ import (
 	"github.com/yhat/scrape"
 	"golang.org/x/net/html"
 	"golang.org/x/net/html/atom"
-	// "github.com/iamwave/samorozvrh/cache"
+
+	"github.com/iamwave/samorozvrh/backend/cache"
 )
 
 // The year in which semester 1 begins
@@ -161,8 +162,6 @@ func parseEvent(event *html.Node) (Event, error) {
 		return Event{}, err
 	}
 
-	// fmt.Println(eventUrl)
-
 	e := Event{
 		Type:     cols[1],
 		Name:     cols[2],
@@ -179,8 +178,12 @@ func parseEvent(event *html.Node) (Event, error) {
 
 func addEventBuilding(e *Event, eventUrl string) {
 	fmt.Println(eventUrl)
-	// cacheName = fmt.Sprintf("rooms/%s", e.Room)
-	// if isCached
+	// cacheName := []string{"rooms", e.Room}
+	// if cache.Has(cacheName) {
+	// 	cache.Get(cache)
+	// } else {
+
+	// }
 }
 
 func addEventScheduling(e *Event, daytime string, dur string) error {

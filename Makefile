@@ -7,7 +7,7 @@ build-solver:
 
 build-server:
 	cd backend/server && make -j
-	mkdir -p cache
+	mkdir -p cache/courses
 	python3 generate_dummy_subjects.py
 
 build-frontend:

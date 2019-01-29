@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"strings"
 
-	// "github.com/iamwave/samorozvrh/cache"
+	"github.com/iamwave/samorozvrh/backend/cache"
 	"github.com/iamwave/samorozvrh/backend/sisparse"
 )
 
@@ -46,9 +46,9 @@ func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Sisquery: %s", ellipsis(query, 10))
 	cacheName := []string{"courses", query}
 
-	if isCached(cacheName) {
+	if cache.Has(cacheName) {
 		log.Println("  (using cache)")
-		res, err = getCache(cacheName)
+		res, err = cache.Get(cacheName)
 	} else {
 		log.Println("  (querying)")
 		var events [][]sisparse.Event
@@ -58,7 +58,7 @@ func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 			s, err = json.Marshal(events)
 			if err == nil {
 				res = fmt.Sprintf(`{"data":%s}`, string(s))
-				err = setCache(cacheName, res)
+				err = cache.Set(cacheName, res)
 			}
 		}
 	}
@@ -102,6 +102,7 @@ func main() {
 	port := flag.Int("port", 8080, "port on which to start the server")
 	flag.Parse()
 	rootDir = *rdir
+	cache.SetRootDir(rootDir)
 
 	http.HandleFunc("/sisquery/", sisQueryHandler)
 	http.HandleFunc("/solverquery/", solverQueryHandler)
