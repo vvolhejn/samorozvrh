@@ -29,7 +29,8 @@ func Solve(query []byte, timeLimit int) ([]byte, error) {
 
 	res, err := subProcess.CombinedOutput()
 	if err != nil {
-		return nil, err
+		err2 := fmt.Errorf(strings.Join([]string{err.Error(), string(res)}, ";"))
+		return nil, err2
 	}
 	return res, nil
 }

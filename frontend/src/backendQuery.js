@@ -8,7 +8,7 @@ var util = require('./util')
 export function createScheduleQuery(courses) {
   const REWARDS = [1, 100, 10000]
 
-  let query = []
+  let queryCourses = []
   
   // maps sent data to application data
   let queryMap = []
@@ -20,7 +20,7 @@ export function createScheduleQuery(courses) {
     let course = sentCourses[i]
     let sentGroups = course.groups.filter(g => g.allowed)
 
-    query.push({
+    queryCourses.push({
       id: course.type + ";" + course.name, // TODO: does the server need this argument?
       name: course.name,
       reward: REWARDS[(course.priority || 2) - 1],
@@ -33,10 +33,15 @@ export function createScheduleQuery(courses) {
     })
   }
 
+  let query = {
+    'data': queryCourses,
+    'options': {}
+  }
+
   return [query, queryMap]
 }
 
-export function createSchedule (queryArray, callback) {
+export function createSchedule (query, callback) {
   var onResponse = function (responseString, error) {
     if (error) {
       callback(null, error)
@@ -52,7 +57,7 @@ export function createSchedule (queryArray, callback) {
     }
   }
 
-  util.makeHttpRequest('POST', 'solverquery/', JSON.stringify(queryArray), onResponse)
+  util.makeHttpRequest('POST', 'solverquery/', JSON.stringify(query), onResponse)
 }
 
 export function addCourse (courseCode, callback) {

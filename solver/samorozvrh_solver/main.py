@@ -16,12 +16,12 @@ def main():
     parser.add_argument('--time-limit',
                         type=int,
                         default=1000,
-                        help='At most how much time to spend on solving')
+                        help='At most how many ms to spend on solving')
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO if args.debug else logging.WARN)
 
     courses_json = json.load(open(args.file))
-    courses = course.load_course_array(courses_json)
+    courses = course.load_course_array(courses_json['data'])
     logging.info('Solving...')
 
     for selection in solver.solve(courses, args.time_limit):

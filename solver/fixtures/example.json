@@ -1,66 +1,68 @@
-[
-  {
-    "name": "a",
-    "reward": 103,
-    "options": [
-      [
-        {
-          "day": 0,
-          "time_from": "12:00",
-          "time_to": "13:00",
-          "name": "a1"
-        },
-        {
-          "day": 1,
-          "time_from": "12:00",
-          "time_to": "13:00",
-          "name": "a2"
-        }
+{
+  "data": [
+    {
+      "name": "a",
+      "reward": 103,
+      "options": [
+        [
+          {
+            "day": 0,
+            "time_from": "12:00",
+            "time_to": "13:00",
+            "name": "a1"
+          },
+          {
+            "day": 1,
+            "time_from": "12:00",
+            "time_to": "13:00",
+            "name": "a2"
+          }
+        ]
       ]
-    ]
-  },
-  {
-    "name": "b",
-    "reward": 2,
-    "options": [
-      [
-        {
-          "day": 0,
-          "time_from": "12:00",
-          "time_to": "13:00",
-          "name": "b1"
-        }
-      ],
-      [
-        {
-          "day": 1,
-          "time_from": "12:00",
-          "time_to": "13:00",
-          "name": "b2"
-        }
+    },
+    {
+      "name": "b",
+      "reward": 2,
+      "options": [
+        [
+          {
+            "day": 0,
+            "time_from": "12:00",
+            "time_to": "13:00",
+            "name": "b1"
+          }
+        ],
+        [
+          {
+            "day": 1,
+            "time_from": "12:00",
+            "time_to": "13:00",
+            "name": "b2"
+          }
+        ]
       ]
-    ]
-  },
-  {
-    "name": "c",
-    "reward": 100,
-    "options": [
-      [
-        {
-          "day": 0,
-          "time_from": "12:00",
-          "time_to": "13:00",
-          "name": "c1"
-        }
-      ],
-      [
-        {
-          "day": 1,
-          "time_from": "12:00",
-          "time_to": "13:00",
-          "name": "c2"
-        }
+    },
+    {
+      "name": "c",
+      "reward": 100,
+      "options": [
+        [
+          {
+            "day": 0,
+            "time_from": "12:00",
+            "time_to": "13:00",
+            "name": "c1"
+          }
+        ],
+        [
+          {
+            "day": 1,
+            "time_from": "12:00",
+            "time_to": "13:00",
+            "name": "c2"
+          }
+        ]
       ]
-    ]
-  }
-]
+    }
+  ]
+}
