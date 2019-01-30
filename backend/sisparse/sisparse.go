@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -28,13 +27,16 @@ const semester = 1
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 const scheduleBaseUrl = "https://is.cuni.cz/studium/rozvrhng/"
 
+const DEBUG = false
+
 // Returns a two-dimensional array containing groups of events.
 // Each group is a slice of events which must be enrolled together,
 // the groups represent different times/teachers of the same course.
 // Also, lectures and seminars/practicals are in separate groups.
 func GetCourseEvents(courseCode string) ([][]Event, error) {
 	subjectUrl := fmt.Sprintf(sisUrl, courseCode, schoolYear, semester)
-	resp, err := http.Get(subjectUrl)
+
+	subjectHtmlRoot, err := getHtml(subjectUrl)
 	if err != nil {
 		return nil, err
 	}
@@ -42,12 +44,7 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	// because SIS requires the faculty number. Therefore we first open the course
 	// in the "Subjects" SIS module and then go to a link which takes
 	// us to the schedule.
-	relativeScheduleUrl, err := getRelativeScheduleUrl(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	scheduleUrl, err := getAbsoluteUrl(sisUrl, relativeScheduleUrl)
+	scheduleUrl, err := getScheduleUrl(subjectHtmlRoot)
 	if err != nil {
 		return nil, err
 	}
@@ -62,20 +59,15 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 		-1,
 	)
 
-	resp, err = http.Get(scheduleUrl)
+	scheduleHtmlRoot, err := getHtml(scheduleUrl)
 	if err != nil {
 		return nil, err
 	}
-	return parseCourseEvents(resp.Body)
+	return parseCourseEvents(scheduleHtmlRoot)
 }
 
-func getRelativeScheduleUrl(body io.ReadCloser) (string, error) {
+func getScheduleUrl(root *html.Node) (string, error) {
 	const scheduleLinkText = "Rozvrh"
-
-	root, err := html.Parse(body)
-	if err != nil {
-		return "", err
-	}
 
 	matcher := func(n *html.Node) bool {
 		if n.DataAtom == atom.A {
@@ -88,19 +80,20 @@ func getRelativeScheduleUrl(body io.ReadCloser) (string, error) {
 	if !ok {
 		return "", errors.New("Couldn't find schedule URL")
 	}
-	return scrape.Attr(scheduleLink, "href"), nil
+	relativeUrl := scrape.Attr(scheduleLink, "href")
+	return getAbsoluteUrl(sisUrl, relativeUrl)
 }
 
-func parseCourseEvents(body io.ReadCloser) ([][]Event, error) {
-	root, err := html.Parse(body)
-	if err != nil {
-		return nil, err
+func parseCourseEvents(root *html.Node) ([][]Event, error) {
+	if DEBUG {
+		f, err := os.Create("/tmp/samorozvrh_debug.html")
+		if err != nil {
+			return nil, err
+		}
+		w := bufio.NewWriter(f)
+		html.Render(w, root)
+		w.Flush()
 	}
-
-	f, err := os.Create("/tmp/samorozvrh_debug.html")
-	w := bufio.NewWriter(f)
-	html.Render(w, root)
-	w.Flush()
 
 	matcher := func(n *html.Node) bool {
 		if n.DataAtom == atom.Tr && n.Parent != nil && n.Parent.Parent != nil {
@@ -183,7 +176,6 @@ func parseEvent(event *html.Node) (Event, error) {
 }
 
 func addEventBuilding(e *Event, eventUrl string) error {
-	fmt.Println(eventUrl)
 	cacheName := []string{"rooms", e.Room}
 
 	if cache.Has(cacheName) {
@@ -193,11 +185,7 @@ func addEventBuilding(e *Event, eventUrl string) error {
 		}
 		return err
 	} else {
-		resp, err := http.Get(eventUrl)
-		if err != nil {
-			return err
-		}
-		root, err := html.Parse(resp.Body)
+		root, err := getHtml(eventUrl)
 		if err != nil {
 			return err
 		}
@@ -301,4 +289,12 @@ func roomToBuilding(room string) (string, error) {
 		return "", errors.New(fmt.Sprintf("Could not parse room: %s", room))
 	}
 	return room[p+2:], nil
+}
+
+func getHtml(url string) (*html.Node, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	return html.Parse(resp.Body)
 }
