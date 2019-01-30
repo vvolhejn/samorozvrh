@@ -2,12 +2,15 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+
+	"github.com/iamwave/samorozvrh/backend/cache"
 )
 
 const SOLVER_COMMAND = "../env/bin/samorozvrh_solver --time-limit %d"
@@ -15,6 +18,13 @@ const SOLVER_COMMAND = "../env/bin/samorozvrh_solver --time-limit %d"
 func Solve(query []byte, timeLimit int) ([]byte, error) {
 	// Create a temporary file with the query, feed it to the solver
 	// and run it
+
+	transferTimes, err := transferTimesJSON()
+	if err == nil {
+		query = []byte(
+			string(query[:len(query)-1]) + ", \"transfer_times\": " + transferTimes + "}",
+		)
+	}
 
 	tempfile, err := createQueryFile(query)
 	if err != nil {
@@ -47,4 +57,19 @@ func createQueryFile(query []byte) (*os.File, error) {
 		return nil, err
 	}
 	return tempfile, nil
+}
+
+func transferTimesJSON() (string, error) {
+	cacheName := []string{"transfer_time_matrix.json"}
+
+	if !cache.Has(cacheName) {
+		return "", errors.New("Could not find transfer time matrix")
+	}
+
+	res, err := cache.Get(cacheName)
+	if err != nil {
+		return "", errors.New("Could not find transfer time matrix")
+	}
+
+	return res, nil
 }
