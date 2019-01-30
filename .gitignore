@@ -5,3 +5,14 @@ cache/
 
 # Virtualenv
 env/
+
+### Python
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+*.egg-info/
+
+# mypy
+.mypy_cache/
