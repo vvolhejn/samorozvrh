@@ -10,6 +10,7 @@ type Event struct {
 	Name       string
 	Teacher    string
 	Room       string
+	Building   string
 	Language   string
 	Day        int
 	TimeFrom   time.Time
@@ -25,6 +26,7 @@ func (e Event) MarshalJSON() ([]byte, error) {
 		Name       string `json:"name"`
 		Teacher    string `json:"teacher"`
 		Room       string `json:"room"`
+		Building   string `json:"building"`
 		Language   string `json:"language"`
 		Day        int    `json:"day"`
 		TimeFrom   string `json:"time_from"`
@@ -35,6 +37,7 @@ func (e Event) MarshalJSON() ([]byte, error) {
 		Name:       e.Name,
 		Teacher:    e.Teacher,
 		Room:       e.Room,
+		Building:   e.Building,
 		Language:   e.Language,
 		Day:        e.Day,
 		TimeFrom:   e.TimeFrom.Format("15:04"),

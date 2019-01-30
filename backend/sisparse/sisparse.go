@@ -24,6 +24,7 @@ const schoolYear = 2018
 
 // 1 for winter, 2 for summer
 const semester = 1
+
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 const scheduleBaseUrl = "https://is.cuni.cz/studium/rozvrhng/"
 
@@ -54,7 +55,12 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	// For some subjects (ASZLJ3010), the link has the wrong semester for whatever reason
 	// (even though the correct semester is specified in the original URL).
 	// Let's fix this manually.
-	scheduleUrl = strings.Replace(scheduleUrl, fmt.Sprintf("sem=%d", 3-semester), fmt.Sprintf("sem=%d", semester), -1)
+	scheduleUrl = strings.Replace(
+		scheduleUrl,
+		fmt.Sprintf("sem=%d", 3-semester),
+		fmt.Sprintf("sem=%d", semester),
+		-1,
+	)
 
 	resp, err = http.Get(scheduleUrl)
 	if err != nil {
@@ -176,14 +182,48 @@ func parseEvent(event *html.Node) (Event, error) {
 	return e, err
 }
 
-func addEventBuilding(e *Event, eventUrl string) {
+func addEventBuilding(e *Event, eventUrl string) error {
 	fmt.Println(eventUrl)
-	// cacheName := []string{"rooms", e.Room}
-	// if cache.Has(cacheName) {
-	// 	cache.Get(cache)
-	// } else {
+	cacheName := []string{"rooms", e.Room}
 
-	// }
+	if cache.Has(cacheName) {
+		building, err := cache.Get(cacheName)
+		if err == nil {
+			e.Building = building
+		}
+		return err
+	} else {
+		resp, err := http.Get(eventUrl)
+		if err != nil {
+			return err
+		}
+		root, err := html.Parse(resp.Body)
+		if err != nil {
+			return err
+		}
+
+		matcher := func(n *html.Node) bool {
+			if n.DataAtom == atom.Td &&
+				n.Parent != nil &&
+				n.Parent.FirstChild != n &&
+				scrape.Text(n.Parent.FirstChild) == "Místo výuky:" {
+				return true
+			}
+			return false
+		}
+
+		rooms := scrape.FindAll(root, matcher)
+		if len(rooms) != 1 {
+			return errors.New(fmt.Sprintf("Found %d rooms, expected 1", len(rooms)))
+		}
+		building, err := roomToBuilding(scrape.Text(rooms[0]))
+		if err != nil {
+			return err
+		}
+		cache.Set(cacheName, building)
+		e.Building = building
+	}
+	return nil
 }
 
 func addEventScheduling(e *Event, daytime string, dur string) error {
@@ -253,4 +293,12 @@ func getAbsoluteUrl(base, relative string) (string, error) {
 		return "", err
 	}
 	return baseUrl.ResolveReference(relativeUrl).String(), nil
+}
+
+func roomToBuilding(room string) (string, error) {
+	p := strings.LastIndex(room, ") ")
+	if p == -1 {
+		return "", errors.New(fmt.Sprintf("Could not parse room: %s", room))
+	}
+	return room[p+2:], nil
 }

@@ -15,4 +15,5 @@ build-frontend:
 
 clear-cache:
 	rm -rf cache/*
+	mkdir -p cache/courses
 	python3 generate_dummy_subjects.py
