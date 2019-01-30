@@ -143,7 +143,7 @@ export default {
       }
 
       // add the group
-      course.groups.push(Group.fromData(course, index, groupData))
+      course.groups.push(Group.fromJson(course, {index: index, terms: groupData}))
     },
 
     /**

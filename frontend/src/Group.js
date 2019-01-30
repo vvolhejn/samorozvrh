@@ -35,15 +35,6 @@ export default class Group {
     this.allowed = true
   }
 
-  /**
-   * Creates a Group instance from data sent by the server
-   */
-  static fromData (course, index, data) {
-    let group = new Group(course, index)
-    data.forEach(d => group.terms.push(Term.fromData(group, d)))
-    return group
-  }
-
   serializeForBackendQuery () {
     return this.terms.map(term => term.serializeForBackendQuery())
   }
@@ -52,14 +43,14 @@ export default class Group {
     return {
       index: this.index,
       terms: this.terms.map(t => t.toJson()),
-      allowed: this.allowed
+      allowed: this.allowed,
     }
   }
 
   static fromJson (course, json) {
     let group = new Group(course, json.index)
     group.terms = json.terms.map(t => Term.fromJson(group, t))
-    group.allowed = json.allowed
+    group.allowed = (typeof json.allowed === typeof true) ? json.allowed : true
     return group
   }
 }

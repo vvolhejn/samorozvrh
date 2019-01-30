@@ -2,27 +2,25 @@
  * Represents a single term of a group.
  * Most groups have only a single term, but not all do.
  */
+
 export default class Term {
-  constructor (group, teacher, day, timeFrom, timeTo, weekParity) {
-    /**
-     * Group this term belongs to
-     */
+  constructor (group, teacher, room, building, language,
+    day, timeFrom, timeTo, weekParity) {
     this.group = group
-
-    /**
-     * Teacher name
-     * @type {string}
-     */
     this.teacher = teacher
-
-    /**
-     * Day index and times
-     */
+    /** Room, often a code such as "S4" */
+    this.room = room
+    /** Address of the room's building */
+    this.building = building
+    /** typically 'čeština' or 'angličtina' */
+    this.language = language
+    /** Day index from 0 to 4 */
     this.day = day
     this.timeFrom = timeFrom
     this.timeTo = timeTo
 
     /**
+     * 0 == every week
      * 1 == odd weeks
      * 2 == even weeks
      */
@@ -30,21 +28,7 @@ export default class Term {
   }
 
   /**
-   * Creates a Term instance from data sent by the server
-   */
-  static fromData (group, data) {
-    return new Term(
-      group,
-      data.teacher,
-      data.day,
-      data.time_from,
-      data.time_to,
-      data.week_parity
-    )
-  }
-
-  /**
-   * Returns a string describing time of the term
+   * Returns a string describing the time of the term
    */
   getTimeString () {
     var s = ['Po', 'Út', 'St', 'Čt', 'Pá'][this.day]
@@ -63,20 +47,25 @@ export default class Term {
       type: this.group.course.type,
 
       teacher: this.teacher,
+      building: this.building,
+      language: this.language,
       day: this.day,
       time_from: this.timeFrom,
       time_to: this.timeTo,
-      week_parity: this.weekParity
+      week_parity: this.weekParity,
     }
   }
 
   toJson () {
     return {
       teacher: this.teacher,
+      room: this.room,
+      building: this.building,
+      language: this.language,
       day: this.day,
-      timeFrom: this.timeFrom,
-      timeTo: this.timeTo,
-      weekParity: this.weekParity
+      time_from: this.timeFrom,
+      time_to: this.timeTo,
+      week_parity: this.weekParity,
     }
   }
 
@@ -84,10 +73,13 @@ export default class Term {
     return new Term(
       group,
       json.teacher,
+      json.room,
+      json.building,
+      json.language,
       json.day,
-      json.timeFrom,
-      json.timeTo,
-      json.weekParity
+      json.time_from,
+      json.time_to,
+      json.week_parity,
     )
   }
 }
