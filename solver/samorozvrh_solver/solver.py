@@ -12,7 +12,7 @@ def solve(courses, time_limit_ms):
     Given a list of courses to enroll in (a course may have multiple alternative times),
     find a valid schedule.
     """
-    solver = pywrapcp.Solver('autorozvrh')
+    solver = pywrapcp.Solver('samorozvrh')
 
     flat_vars = []
     flat_vars_inverse = []
