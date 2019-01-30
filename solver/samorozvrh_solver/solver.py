@@ -12,7 +12,7 @@ def solve(courses, time_limit_ms):
     Given a list of courses to enroll in (a course may have multiple alternative times),
     find a valid schedule.
     """
-    solver = pywrapcp.Solver("autorozvrh")
+    solver = pywrapcp.Solver('autorozvrh')
 
     flat_vars = []
     flat_vars_inverse = []
@@ -56,15 +56,15 @@ def solve(courses, time_limit_ms):
             collector,
         ])
 
-    logger.info("Time: {} ms".format(solver.WallTime()))
+    logger.info('Time: {} ms'.format(solver.WallTime()))
     if not ok:
-        logger.warning("No solution was found or an error occurred in the solver.")
+        logger.warning('No solution was found or an error occurred in the solver.')
         return
 
-    logger.info("Number of solutions: {}".format(collector.SolutionCount()))
+    logger.info('Number of solutions: {}'.format(collector.SolutionCount()))
 
     for solution_index in range(collector.SolutionCount()):
-        logger.info("Solution {} (reward {})".format(solution_index,
+        logger.info('Solution {} (reward {})'.format(solution_index,
                                                      collector.ObjectiveValue(solution_index)))
         yield _solution_to_selection(collector, solution_index,
                                      flat_vars, flat_vars_inverse, len(courses))
@@ -82,8 +82,8 @@ def _solution_to_selection(collector, solution_index, flat_vars, flat_vars_inver
         if collector.PerformedValue(solution_index, flat_vars[j]):
             course_index, opt_index = flat_vars_inverse[j]
             if (selection[course_index] is not None) and (selection[course_index] != opt_index):
-                raise RuntimeError("Multiple options were chosen for "
-                                   "course {} ".format(course_index))
+                raise RuntimeError('Multiple options were chosen for '
+                                   'course {} '.format(course_index))
 
             selection[course_index] = opt_index
 
@@ -103,7 +103,7 @@ def create_course_variables(solver, course):
     for opt_index, opt in enumerate(course.options):
 
         if not opt:
-            raise ValueError("Each option should contain at least one event.")
+            raise ValueError('Each option should contain at least one event.')
 
         opt_variables = []
         for event in opt:
@@ -113,7 +113,7 @@ def create_course_variables(solver, course):
                 time_to_int(event.time_from),  # Maximum start time
                 time_to_int(event.time_to) - time_to_int(event.time_from),  # Duration
                 True,  # Is the interval optional?
-                "{} - {}".format(course.name, event.name)
+                '{} - {}'.format(course.name, event.name)
             )
             var.day = event.day  # This is our custom property
 
@@ -149,7 +149,7 @@ def create_disjunctive_constraints(solver, flat_vars):
     for day_num, day in enumerate(events_for_day):
         if not day:
             # For empty arrays, OR-tools complains:
-            # "operations_research::Solver::MakeMax() was called with an empty list of variables."
+            # 'operations_research::Solver::MakeMax() was called with an empty list of variables.'
             continue
 
         disj = solver.DisjunctiveConstraint(day, calendar.day_abbr[day_num])

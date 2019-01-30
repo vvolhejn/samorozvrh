@@ -15,7 +15,7 @@ def schedule_to_string(events):
     TIME_MAX = time(22, 0)
     STEPS = 16
 
-    time_markers = " " * LEN
+    time_markers = ' ' * LEN
     for i in range(STEPS):
         weight = (i / (STEPS - 1))
         cur_time = _get_weighted_average_time(TIME_MIN, TIME_MAX, weight)
@@ -25,22 +25,22 @@ def schedule_to_string(events):
     lines.append(time_markers)
     for day_index, day_events in enumerate(events_for_day):
         lines.append(calendar.day_abbr[day_index] + ('-' * (LEN - 3)))
-        day_string = " " * LEN
+        day_string = ' ' * LEN
         for event in day_events:
             pos_from = int(_time_to_position(TIME_MIN, TIME_MAX, event.time_from) * LEN)
             pos_to = int(_time_to_position(TIME_MIN, TIME_MAX, event.time_to) * LEN)
-            event_string = "[" + (" " * (pos_to - pos_from - 2)) + "]"
+            event_string = '[' + (' ' * (pos_to - pos_from - 2)) + ']'
             event_string = _replace_string_part(event_string, event.name[:len(event_string) - 2], 1)
             day_string = _replace_string_part(day_string, event_string, pos_from)
         lines.append(day_string)
     lines.append('=' * LEN)
 
-    return "\n" + "\n".join(lines)
+    return '\n' + '\n'.join(lines)
 
 
 def _replace_string_part(s, t, i_from):
     """
-    >>> _replace_string_part("aaaaaa", "bb", 1)
+    >>> _replace_string_part('aaaaaa', 'bb', 1)
     'abbaaa'
     """
     i_to = i_from + len(t)
