@@ -39,7 +39,7 @@ def get_transfer_time_matrix(api_key):
     mat = parse_api_response(r.json())
 
     res = {
-        'buildings': buildings,
+        'names': buildings,
         'transfer_times': mat,
     }
 

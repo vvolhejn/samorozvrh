@@ -1,0 +1,65 @@
+{
+  "data": [
+    {
+      "name": "a",
+      "reward": 10,
+      "options": [
+        [
+          {
+            "day": 0,
+            "time_from": "12:00",
+            "time_to": "13:00",
+            "name": "a1",
+            "building": "x"
+          },
+          {
+            "day": 1,
+            "time_from": "12:00",
+            "time_to": "13:00",
+            "name": "a2",
+            "building": "x"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "b",
+      "reward": 5,
+      "options": [
+        [
+          {
+            "day": 0,
+            "time_from": "11:00",
+            "time_to": "11:50",
+            "name": "b1",
+            "building": "y"
+          }
+        ]
+      ]
+    },
+    {
+      "name": "c",
+      "reward": 6,
+      "options": [
+        [
+          {
+            "day": 1,
+            "time_from": "11:00",
+            "time_to": "11:50",
+            "name": "c1",
+            "building": "z"
+          }
+        ]
+      ]
+    }
+  ],
+  "buildings": {
+    "names": ["x", "y", "z"],
+    "transfer_times": [
+      [0, 0, 0],
+      [0, 0, 0],
+      [15, 0, 0]
+    ]
+  },
+  "options": {}
+}

@@ -2,12 +2,13 @@ import calendar
 import logging
 
 from ortools.constraint_solver import pywrapcp
+
 # Refer to https://github.com/google/or-tools/issues/62
 
 logger = logging.getLogger(__name__)
 
 
-def solve(courses, time_limit_ms):
+def solve(courses, time_limit_ms, transfer_info, allowed_transfer_overlap=0):
     """
     Given a list of courses to enroll in (a course may have multiple alternative times),
     find a valid schedule.
@@ -24,10 +25,12 @@ def solve(courses, time_limit_ms):
         flat_vars.extend([v for v, _ in course_vars])
         flat_vars_inverse.extend([(course_index, opt_index) for _, opt_index in course_vars])
 
-    sequences_for_day = create_disjunctive_constraints(solver, flat_vars)
+    transfer_info.add_to_transfer_times(-allowed_transfer_overlap)
+    sequences_for_day = create_disjunctive_constraints(solver, flat_vars, transfer_info)
 
     # Note: Use AllSolutionCollector to see all solutions rather than the best
-    collector = solver.BestValueSolutionCollector(True)  # True means to choose the maximum, not minimum
+    # True means to choose the maximum, not minimum
+    collector = solver.BestValueSolutionCollector(True)
     collector.Add(flat_vars)  # Make the collector remember the variables' values in solutions
 
     obj_var = solver.Sum(reward_exprs)
@@ -115,7 +118,9 @@ def create_course_variables(solver, course):
                 True,  # Is the interval optional?
                 '{} - {}'.format(course.name, event.name)
             )
-            var.day = event.day  # This is our custom property
+            # Our custom properties
+            var.day = event.day
+            var.building = event.building
 
             opt_variables.append(var)
 
@@ -133,7 +138,7 @@ def create_course_variables(solver, course):
     return variables, course.reward * solver.Sum([r.PerformedExpr() for r in representatives])
 
 
-def create_disjunctive_constraints(solver, flat_vars):
+def create_disjunctive_constraints(solver, flat_vars, transfer_info):
     """
     Create constrains that forbids multiple events from taking place at the same time.
     Returns a list of `SequenceVar`s, one for each day. These are then used in the first
@@ -153,6 +158,9 @@ def create_disjunctive_constraints(solver, flat_vars):
             continue
 
         disj = solver.DisjunctiveConstraint(day, calendar.day_abbr[day_num])
+        transfer_time_f = transfer_info.create_distance_callback([e.building for e in day])
+        disj.SetTransitionTime(transfer_time_f)
+
         solver.Add(disj)
         sequences_for_day.append(disj.SequenceVar())
 

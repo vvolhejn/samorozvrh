@@ -24,7 +24,10 @@ def main():
     courses = course.load_course_array(courses_json['data'])
     logging.info('Solving...')
 
-    for selection in solver.solve(courses, args.time_limit):
+    transfer_info = course.TransferInfo.load(courses_json)
+    other_options = courses_json.get('options', {})
+
+    for selection in solver.solve(courses, args.time_limit, transfer_info, **other_options):
         events = []
         for c, opt_index in zip(courses, selection):
             if opt_index is not None:

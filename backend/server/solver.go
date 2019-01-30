@@ -22,7 +22,7 @@ func Solve(query []byte, timeLimit int) ([]byte, error) {
 	transferTimes, err := transferTimesJSON()
 	if err == nil {
 		query = []byte(
-			string(query[:len(query)-1]) + ", \"transfer_times\": " + transferTimes + "}",
+			string(query[:len(query)-1]) + ", \"buildings\": " + transferTimes + "}",
 		)
 	}
 
