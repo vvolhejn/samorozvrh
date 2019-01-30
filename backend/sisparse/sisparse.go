@@ -152,11 +152,7 @@ func parseEvent(event *html.Node) (*Event, error) {
 	for col := event.FirstChild; col != nil; col = col.NextSibling {
 		// For some reason we also get siblings with no tag and no data?
 		if len(strings.TrimSpace(col.Data)) > 0 {
-			if col.DataAtom == atom.A {
-				cols = append(cols, scrape.Attr(col, "href"))
-			} else {
-				cols = append(cols, scrape.Text(col))
-			}
+			cols = append(cols, scrape.Text(col))
 		}
 	}
 
@@ -174,13 +170,16 @@ func parseEvent(event *html.Node) (*Event, error) {
 		return nil, nil
 	}
 
-	relativeEventUrl := scrape.Attr(event.FirstChild.NextSibling.FirstChild, "href")
+	firstCol := event.FirstChild.NextSibling.FirstChild
+	eventCode := scrape.Text(firstCol)
+	relativeEventUrl := scrape.Attr(firstCol, "href")
+
 	eventUrl, err := getAbsoluteUrl(scheduleBaseUrl, relativeEventUrl)
 	if err != nil {
 		return nil, err
 	}
 
-	err = addEventBuilding(&e, eventUrl)
+	err = addEventBuilding(&e, eventUrl, eventCode)
 	if err != nil {
 		return nil, err
 	}
@@ -188,7 +187,7 @@ func parseEvent(event *html.Node) (*Event, error) {
 	return &e, err
 }
 
-func addEventBuilding(e *Event, eventUrl string) error {
+func addEventBuilding(e *Event, eventUrl string, eventCode string) error {
 	cacheName := []string{"rooms", e.Room}
 
 	if cache.Has(cacheName) {
@@ -204,18 +203,25 @@ func addEventBuilding(e *Event, eventUrl string) error {
 		}
 
 		matcher := func(n *html.Node) bool {
+			// Ex: https://is.cuni.cz/studium/rozvrhng/roz_predmet_gl.php?skr=2018&sem=1&gl=18aMB150P31p1&fak=11310
+			// Must be in the correct row of the correct table
 			if n.DataAtom == atom.Td &&
-				n.Parent != nil &&
+				hasNthParent(n, 4) &&
 				n.Parent.FirstChild != n &&
 				scrape.Text(n.Parent.FirstChild) == "Místo výuky:" {
-				return true
+
+				p := n.Parent.Parent.Parent.Parent
+				if p.FirstChild != nil && p.FirstChild.NextSibling != nil &&
+					strings.HasSuffix(scrape.Text(p.FirstChild.NextSibling), eventCode) {
+					return true
+				}
 			}
 			return false
 		}
 
 		rooms := scrape.FindAll(root, matcher)
 		if len(rooms) != 1 {
-			return errors.New(fmt.Sprintf("Found %d rooms, expected 1", len(rooms)))
+			return errors.New(fmt.Sprintf("Matched %d rooms, expected 1", len(rooms)))
 		}
 		building, err := roomToBuilding(scrape.Text(rooms[0]))
 		if err != nil {
@@ -310,4 +316,17 @@ func getHtml(url string) (*html.Node, error) {
 		return nil, err
 	}
 	return html.Parse(resp.Body)
+}
+
+func hasNthParent(node *html.Node, n int) bool {
+	if n <= 0 {
+		return true
+	}
+	for i := 0; i <= n; i++ {
+		if node == nil {
+			return false
+		}
+		node = node.Parent
+	}
+	return true
 }
