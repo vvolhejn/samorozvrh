@@ -115,6 +115,11 @@ func parseCourseEvents(root *html.Node) ([][]Event, error) {
 	for _, row := range eventsTable {
 		event, err := parseEvent(row)
 		if err != nil {
+			return nil, err
+		}
+		if event == nil {
+			// This could happen if an event is not scheduled, see:
+			// https://is.cuni.cz/studium/rozvrhng/roz_predmet_macro.php?fak=11320&skr=2018&sem=1&predmet=NAIL062
 			continue
 		}
 		// A non-empty name means the start of a new group;
@@ -129,7 +134,7 @@ func parseCourseEvents(root *html.Node) ([][]Event, error) {
 			event.Name = group[0].Name
 			event.Teacher = group[0].Teacher
 		}
-		group = append(group, event)
+		group = append(group, *event)
 	}
 	if len(group) > 0 {
 		res = append(res, group)
@@ -142,7 +147,7 @@ func parseCourseEvents(root *html.Node) ([][]Event, error) {
 	return res, nil
 }
 
-func parseEvent(event *html.Node) (Event, error) {
+func parseEvent(event *html.Node) (*Event, error) {
 	var cols []string
 	for col := event.FirstChild; col != nil; col = col.NextSibling {
 		// For some reason we also get siblings with no tag and no data?
@@ -155,12 +160,6 @@ func parseEvent(event *html.Node) (Event, error) {
 		}
 	}
 
-	relativeEventUrl := scrape.Attr(event.FirstChild.NextSibling.FirstChild, "href")
-	eventUrl, err := getAbsoluteUrl(scheduleBaseUrl, relativeEventUrl)
-	if err != nil {
-		return Event{}, err
-	}
-
 	e := Event{
 		Type:     cols[1],
 		Name:     cols[2],
@@ -169,10 +168,24 @@ func parseEvent(event *html.Node) (Event, error) {
 		Language: cols[7],
 	}
 
-	addEventBuilding(&e, eventUrl)
+	err := addEventScheduling(&e, cols[4], cols[6])
+	if err != nil {
+		// The event is not scheduled - this is ok
+		return nil, nil
+	}
 
-	err = addEventScheduling(&e, cols[4], cols[6])
-	return e, err
+	relativeEventUrl := scrape.Attr(event.FirstChild.NextSibling.FirstChild, "href")
+	eventUrl, err := getAbsoluteUrl(scheduleBaseUrl, relativeEventUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	err = addEventBuilding(&e, eventUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	return &e, err
 }
 
 func addEventBuilding(e *Event, eventUrl string) error {
