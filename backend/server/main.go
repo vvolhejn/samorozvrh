@@ -43,7 +43,7 @@ func sisQueryHandler(w http.ResponseWriter, r *http.Request) {
 	var err error
 
 	query = strings.ToUpper(query)
-	log.Printf("Sisquery: %s", ellipsis(query, 10))
+	log.Printf("Sisquery (from %s): %s", r.RemoteAddr, ellipsis(query, 10))
 	cacheName := []string{"courses", query}
 
 	if cache.Has(cacheName) {
@@ -86,7 +86,7 @@ func solverQueryHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Solverquery: %s\n", ellipsis(string(body), 30))
+	log.Printf("Solverquery (from %s): %s\n", r.RemoteAddr, ellipsis(string(body), 30))
 	res, err := Solve(body, TIME_PER_QUERY)
 	if err != nil {
 		log.Printf("Solverquery error: %s", err)
