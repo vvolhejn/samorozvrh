@@ -22,7 +22,7 @@ import (
 const schoolYear = 2018
 
 // 1 for winter, 2 for summer
-const semester = 1
+const semester = 2
 
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 const scheduleBaseUrl = "https://is.cuni.cz/studium/rozvrhng/"
