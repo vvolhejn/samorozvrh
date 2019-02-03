@@ -34,8 +34,12 @@ h1 {
     padding-top: 0.5em;
 }
 
-.selected_course {
+.selected_group {
     background-color: #EEF;
+}
+
+.unscheduled_course {
+    background-color: #FDD;
 }
 
 .pr_radio:not(old) {

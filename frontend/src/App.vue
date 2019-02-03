@@ -166,6 +166,7 @@ export default {
         // create the schedule
         this.schedule = []
         for (let i = 0; i < res.length; i++) {
+          queryMap[i].course.scheduled = (res[i] !== null)
           if (res[i] !== null) {
             this.schedule.splice( // append terms to schedule
               this.schedule.length,

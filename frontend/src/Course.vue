@@ -1,7 +1,7 @@
 <template>
   
 <tbody id="course_table_body">
-  <tr class="course_header">
+  <tr class="course_header" :class="{'unscheduled_course': !course.scheduled && allowed}">
     <td>
       <input
         type="checkbox"
@@ -40,7 +40,7 @@ export default {
     },
 
     title() {
-      return this.course.name + " (" +  this.course.getTypeName() + ")"
+      return `${this.course.code} ${this.course.name} (${this.course.getTypeName()})`
     }
   },
   methods: {

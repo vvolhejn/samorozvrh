@@ -40,31 +40,35 @@ export default class Course {
      * Course priority with possible values: {1, 2, 3}
      */
     this.priority = 2
+
+    /**
+     * Whether this course has a group selected in the current schedule
+     */
+    this.scheduled = false
   }
 
   /**
    * Is this course allowed to be considered during schedule creation?
    */
-  get allowed() {
-    for (const group of this.groups)
-      if (group.allowed)
-        return true
+  get allowed () {
+    for (const group of this.groups) {
+      if (group.allowed) { return true }
+    }
     return false
   }
 
-  set allowed(value) {
-    for (const group of this.groups)
-      group.allowed = value
+  set allowed (value) {
+    for (const group of this.groups) { group.allowed = value }
   }
 
   /**
    * Returns human-readable name of the course type
    */
-  getTypeName() {
+  getTypeName () {
     switch (this.type) {
       case 'P': return 'přednáška'
       case 'X': return 'seminář'
-      default:  return 'jiné'
+      default: return 'jiné'
     }
   }
 

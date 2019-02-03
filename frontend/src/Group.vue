@@ -30,7 +30,7 @@ export default {
     groupClass () {
       for (const term of this.schedule) {
         if (term.group === this.group) {
-          return 'selected_course'
+          return 'selected_group'
         }
       }
       return ''
