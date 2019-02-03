@@ -60,7 +60,7 @@ export default {
     /**
      * Value of the "add course" text field
      */
-    courseCodeFieldValue: 'NTIN061',
+    courseCodeFieldValue: 'NMAI063',
 
     /**
      * Message displayed in the status bar
