@@ -5,11 +5,12 @@ var util = require('./util')
 /**
  * Creates the server query for creating the schedule
  */
-export function createScheduleQuery(courses) {
+export function createScheduleQuery (courses) {
   const REWARDS = [1, 100, 10000]
+  const DEFAULT_ALLOWED_TRANSFER_OVERLAP = 5 // How many minutes is it ok to come late
 
   let queryCourses = []
-  
+
   // maps sent data to application data
   let queryMap = []
 
@@ -21,7 +22,7 @@ export function createScheduleQuery(courses) {
     let sentGroups = course.groups.filter(g => g.allowed)
 
     queryCourses.push({
-      id: course.type + ";" + course.name, // TODO: does the server need this argument?
+      id: course.type + ';' + course.name, // TODO: does the server need this argument?
       name: course.name,
       reward: REWARDS[(course.priority || 2) - 1],
       options: sentGroups.map(g => g.serializeForBackendQuery())
@@ -35,7 +36,7 @@ export function createScheduleQuery(courses) {
 
   let query = {
     'data': queryCourses,
-    'options': {}
+    'options': { 'allowed_transfer_overlap': DEFAULT_ALLOWED_TRANSFER_OVERLAP }
   }
 
   return [query, queryMap]
