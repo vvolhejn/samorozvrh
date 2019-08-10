@@ -3,7 +3,7 @@
 A webserver to serve the Samorozvrh webapp. After compiling with
 
 ```
-go install github.com/src/github.com/iamwave/samorozvrh/server
+go install github.com/src/github.com/iamwave/samorozvrh/backend/server
 ```
 
 start the server with
