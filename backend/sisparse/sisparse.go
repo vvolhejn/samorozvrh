@@ -66,7 +66,37 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	return parseCourseEvents(scheduleHtmlRoot)
 }
 
+// if n.DataAtom == atom.Td &&
+//     hasNthParent(n, 4) &&
+//     n.Parent.FirstChild != n &&
+//     scrape.Text(n.Parent.FirstChild) == "Místo výuky:" {
+
+//     p := n.Parent.Parent.Parent.Parent
+//     if p.FirstChild != nil && p.FirstChild.NextSibling != nil &&
+//         strings.HasSuffix(scrape.Text(p.FirstChild.NextSibling), eventCode) {
+//         return true
+//     }
+// }
+
 func getScheduleUrl(root *html.Node) (string, error) {
+	const facultyText = "Rozvrh"
+
+	facultyMatcher := func(n *html.Node) bool {
+		if n.DataAtom == atom.A && hasNthParent(n, 2) {
+			c := n.Parent.Parent.FirstChild
+			if c != nil && c.DataAtom == atom.Th && scrape.Text(c) == "Fakulta:" {
+				return true
+			}
+		}
+		return false
+	}
+
+	facultyLink, ok := scrape.Find(root, facultyMatcher)
+	if !ok {
+		return "", errors.New("Ahh!")
+	}
+	fmt.Println("Faculty link: %v", scrape.Attr(facultyLink, "href"))
+
 	const scheduleLinkText = "Rozvrh"
 
 	matcher := func(n *html.Node) bool {
