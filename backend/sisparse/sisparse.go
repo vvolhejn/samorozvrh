@@ -26,6 +26,7 @@ const semester = 2
 
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 const scheduleBaseUrl = "https://is.cuni.cz/studium/rozvrhng/"
+const scheduleUrlTemplate = "https://is.cuni.cz/studium/rozvrhng/roz_predmet_macro.php?tid=&predmet=%s&skr=%d&sem=%d&fak=%s"
 
 const DEBUG = false
 
@@ -44,7 +45,7 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	// because SIS requires the faculty number. Therefore we first open the course
 	// in the "Subjects" SIS module and then go to a link which takes
 	// us to the schedule.
-	scheduleUrl, err := getScheduleUrl(subjectHtmlRoot)
+	scheduleUrl, err := getScheduleUrl(subjectHtmlRoot, courseCode)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,31 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	return parseCourseEvents(scheduleHtmlRoot)
 }
 
-func getScheduleUrl(root *html.Node) (string, error) {
+func getScheduleUrl(root *html.Node, courseCode string) (string, error) {
+	// The schedule URL requires the code of the course's faculty.
+	// First we try to get the faculty code from a link
+	// and if this fails, we try to find the link to the course's schedule directly
+	// (However, this link is not always available for some reason.)
+
+	const facultyText = "Rozvrh"
+
+	facultyMatcher := func(n *html.Node) bool {
+		if n.DataAtom == atom.A {
+			if strings.Contains(scrape.Attr(n, "href"), "sezn_fak") {
+				return true
+			}
+		}
+		return false
+	}
+
+	facultyLink, ok := scrape.Find(root, facultyMatcher)
+	if ok {
+		parts := strings.Split(scrape.Attr(facultyLink, "href"), "=")
+		faculty := parts[len(parts)-1]
+		url := fmt.Sprintf(scheduleUrlTemplate, courseCode, schoolYear, semester, faculty)
+		return url, nil
+	}
+
 	const scheduleLinkText = "Rozvrh"
 
 	matcher := func(n *html.Node) bool {

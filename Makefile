@@ -14,6 +14,6 @@ build-frontend:
 	cd frontend && make -j
 
 clear-cache:
-	rm -rf cache/*
+	rm -rf cache/courses/
 	mkdir -p cache/courses
 	python3 generate_dummy_subjects.py
