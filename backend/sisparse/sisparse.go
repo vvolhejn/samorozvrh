@@ -26,6 +26,7 @@ const semester = 2
 
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 const scheduleBaseUrl = "https://is.cuni.cz/studium/rozvrhng/"
+const scheduleUrlTemplate = "https://is.cuni.cz/studium/rozvrhng/roz_predmet_macro.php?tid=&predmet=%s&skr=%d&sem=%d&fak=%s"
 
 const DEBUG = false
 
@@ -44,7 +45,7 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	// because SIS requires the faculty number. Therefore we first open the course
 	// in the "Subjects" SIS module and then go to a link which takes
 	// us to the schedule.
-	scheduleUrl, err := getScheduleUrl(subjectHtmlRoot)
+	scheduleUrl, err := getScheduleUrl(subjectHtmlRoot, courseCode)
 	if err != nil {
 		return nil, err
 	}
@@ -66,25 +67,17 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 	return parseCourseEvents(scheduleHtmlRoot)
 }
 
-// if n.DataAtom == atom.Td &&
-//     hasNthParent(n, 4) &&
-//     n.Parent.FirstChild != n &&
-//     scrape.Text(n.Parent.FirstChild) == "Místo výuky:" {
+func getScheduleUrl(root *html.Node, courseCode string) (string, error) {
+	// The schedule URL requires the code of the course's faculty.
+	// First we try to get the faculty code from a link
+	// and if this fails, we try to find the link to the course's schedule directly
+	// (However, this link is not always available for some reason.)
 
-//     p := n.Parent.Parent.Parent.Parent
-//     if p.FirstChild != nil && p.FirstChild.NextSibling != nil &&
-//         strings.HasSuffix(scrape.Text(p.FirstChild.NextSibling), eventCode) {
-//         return true
-//     }
-// }
-
-func getScheduleUrl(root *html.Node) (string, error) {
 	const facultyText = "Rozvrh"
 
 	facultyMatcher := func(n *html.Node) bool {
-		if n.DataAtom == atom.A && hasNthParent(n, 2) {
-			c := n.Parent.Parent.FirstChild
-			if c != nil && c.DataAtom == atom.Th && scrape.Text(c) == "Fakulta:" {
+		if n.DataAtom == atom.A {
+			if strings.Contains(scrape.Attr(n, "href"), "sezn_fak") {
 				return true
 			}
 		}
@@ -92,10 +85,12 @@ func getScheduleUrl(root *html.Node) (string, error) {
 	}
 
 	facultyLink, ok := scrape.Find(root, facultyMatcher)
-	if !ok {
-		return "", errors.New("Ahh!")
+	if ok {
+		parts := strings.Split(scrape.Attr(facultyLink, "href"), "=")
+		faculty := parts[len(parts)-1]
+		url := fmt.Sprintf(scheduleUrlTemplate, courseCode, schoolYear, semester, faculty)
+		return url, nil
 	}
-	fmt.Println("Faculty link: %v", scrape.Attr(facultyLink, "href"))
 
 	const scheduleLinkText = "Rozvrh"
 
