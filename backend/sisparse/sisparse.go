@@ -73,6 +73,7 @@ func getScheduleUrl(root *html.Node, courseCode string) (string, error) {
 	// and if this fails, we try to find the link to the course's schedule directly
 	// (However, this link is not always available for some reason.)
 
+	// <<<<<<< HEAD
 	const facultyText = "Rozvrh"
 
 	facultyMatcher := func(n *html.Node) bool {
@@ -83,20 +84,50 @@ func getScheduleUrl(root *html.Node, courseCode string) (string, error) {
 		}
 		return false
 	}
+	// =======
+	// //     p := n.Parent.Parent.Parent.Parent
+	// //     if p.FirstChild != nil && p.FirstChild.NextSibling != nil &&
+	// //         strings.HasSuffix(scrape.Text(p.FirstChild.NextSibling), eventCode) {
+	// //         return true
+	// //     }
+	// // }
+
+	// func getScheduleUrl(root *html.Node) (string, error) {
+	// 	fmt.Println("Test")
+	// 	const facultyText = "Rozvrh"
+
+	// 	facultyMatcher := func(n *html.Node) bool {
+	// 		return true
+	// 		if n.DataAtom == atom.A {
+	// 			return true
+	// 		}
+	// 		if n.DataAtom == atom.A && hasNthParent(n, 2) {
+	// 			// c := n.Parent.Parent.FirstChild
+	// 			// if c != nil && c.DataAtom == atom.Th && scrape.Text(c) == "Fakulta:" {
+	// 			// 	return true
+	// 			// }
+	// 			return true
+	// }
+	// return false
+	// }
+	// >>>>>>> 5d8ace7cecdc590c1cfe3c07a79d170ec3e62cbb
 
 	facultyLink, ok := scrape.Find(root, facultyMatcher)
 	if ok {
 		parts := strings.Split(scrape.Attr(facultyLink, "href"), "=")
 		faculty := parts[len(parts)-1]
 		url := fmt.Sprintf(scheduleUrlTemplate, courseCode, schoolYear, semester, faculty)
+		fmt.Println("Faculty link, URL: %s", url)
 		return url, nil
 	}
 
-	const scheduleLinkText = "Rozvrh"
-
 	matcher := func(n *html.Node) bool {
 		if n.DataAtom == atom.A {
-			return scrape.Text(n) == scheduleLinkText
+			switch scrape.Text(n) {
+			case "Rozvrh", "Rozvrh ZS", "Rozvrh LS":
+				return true
+			}
+			return false
 		}
 		return false
 	}
