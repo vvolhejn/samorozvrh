@@ -79,21 +79,27 @@ func GetCourseEvents(courseCode string) ([][]Event, error) {
 // }
 
 func getScheduleUrl(root *html.Node) (string, error) {
+	fmt.Println("Test")
 	const facultyText = "Rozvrh"
 
 	facultyMatcher := func(n *html.Node) bool {
+		return true
+		if n.DataAtom == atom.A {
+			return true
+		}
 		if n.DataAtom == atom.A && hasNthParent(n, 2) {
-			c := n.Parent.Parent.FirstChild
-			if c != nil && c.DataAtom == atom.Th && scrape.Text(c) == "Fakulta:" {
-				return true
-			}
+			// c := n.Parent.Parent.FirstChild
+			// if c != nil && c.DataAtom == atom.Th && scrape.Text(c) == "Fakulta:" {
+			// 	return true
+			// }
+			return true
 		}
 		return false
 	}
 
 	facultyLink, ok := scrape.Find(root, facultyMatcher)
 	if !ok {
-		return "", errors.New("Ahh!")
+		return "", errors.New("Ahh?!")
 	}
 	fmt.Println("Faculty link: %v", scrape.Attr(facultyLink, "href"))
 
