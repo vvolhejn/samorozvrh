@@ -92,11 +92,13 @@ func getScheduleUrl(root *html.Node, courseCode string) (string, error) {
 		return url, nil
 	}
 
-	const scheduleLinkText = "Rozvrh"
-
 	matcher := func(n *html.Node) bool {
 		if n.DataAtom == atom.A {
-			return scrape.Text(n) == scheduleLinkText
+			switch scrape.Text(n) {
+			case "Rozvrh", "Rozvrh ZS", "Rozvrh LS":
+				return true
+			}
+			return false
 		}
 		return false
 	}
