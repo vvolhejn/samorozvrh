@@ -7,9 +7,11 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 	"path"
 	"regexp"
 	"strconv"
@@ -101,6 +103,7 @@ func main() {
 	rdir := flag.String("rootdir", ".", "path to Samorozvrh root directory")
 	port := flag.Int("port", 8080, "port on which to start the server")
 	flag.Parse()
+
 	rootDir = *rdir
 	cache.SetRootDir(rootDir)
 
@@ -110,8 +113,16 @@ func main() {
 	fs := http.FileServer(http.Dir(path.Join(rootDir, FRONTEND_DIR)))
 	http.Handle("/", fs)
 
+	logFilePath := "log.txt"
+	logFile, err := os.OpenFile(logFilePath, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0664)
+	if err != nil {
+		log.Fatalf("Could not open log file: %s\n", err)
+	}
+	mw := io.MultiWriter(os.Stdout, logFile)
+	log.SetOutput(mw)
+
 	log.Printf("Listening on: %d", *port)
-	err := http.ListenAndServe(":"+strconv.Itoa(*port), nil)
+	err = http.ListenAndServe(":"+strconv.Itoa(*port), nil)
 	if err != nil {
 		log.Fatalf("Could not start server: %s\n", err)
 	}
