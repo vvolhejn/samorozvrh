@@ -18,11 +18,25 @@ import (
 	"github.com/iamwave/samorozvrh/backend/cache"
 )
 
-// The year in which semester 1 begins
-const schoolYear = 2021
+const winterStartMonth = 6
 
-// 1 for winter, 2 for summer
-const semester = 2
+// Returns the current school year, which is the year in which semester 1 (winter) begins.
+func getCurrentSchoolYear() int {
+  now := time.Now()
+  if now.Month() >= winterStartMonth {
+    return now.Year()
+  }
+  return now.Year() - 1
+}
+
+// Returns the current semester. 1 for winter, 2 for summer.
+func getCurrentSemester() int {
+  now := time.Now()
+  if now.Month() >= winterStartMonth {
+    return 1
+  }
+  return 2
+}
 
 const sisUrl = "https://is.cuni.cz/studium/predmety/index.php?do=predmet&kod=%s&skr=%d&sem=%d"
 const scheduleBaseUrl = "https://is.cuni.cz/studium/rozvrhng/"
@@ -35,6 +49,8 @@ const DEBUG = false
 // the groups represent different times/teachers of the same course.
 // Also, lectures and seminars/practicals are in separate groups.
 func GetCourseEvents(courseCode string) ([][]Event, error) {
+  schoolYear := getCurrentSchoolYear()
+  semester := getCurrentSemester()
 	subjectUrl := fmt.Sprintf(sisUrl, courseCode, schoolYear, semester)
 
 	subjectHtmlRoot, err := getHtml(subjectUrl)
@@ -88,7 +104,7 @@ func getScheduleUrl(root *html.Node, courseCode string) (string, error) {
 	if ok {
 		parts := strings.Split(scrape.Attr(facultyLink, "href"), "=")
 		faculty := parts[len(parts)-1]
-		url := fmt.Sprintf(scheduleUrlTemplate, courseCode, schoolYear, semester, faculty)
+		url := fmt.Sprintf(scheduleUrlTemplate, courseCode, getCurrentSchoolYear(), getCurrentSemester(), faculty)
 		return url, nil
 	}
 
